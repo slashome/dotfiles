@@ -3,6 +3,10 @@
 # Load configuration files
 source $ROOT_PATH/config/global.cfg
 
+if [ -f $ROOT_PATH/config/secrets.cfg ]; then
+  source $ROOT_PATH/config/secrets.cfg
+fi
+
 # Load files
 source $ROOT_PATH/core/loader.sh
 
