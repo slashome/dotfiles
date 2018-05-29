@@ -30,10 +30,9 @@ runner()
         exit
     fi
 
-    RUN_PATH=$RUN_DIR/$RUN_CMD.sh
+    RUN_PATH=$RUN_DIR/$RUN_CMD
 
     if [ ! -f "$RUN_PATH" ]; then
-    echo $RUN_PATH
         echo ""
         echo -e "${RED}   /!\\ ${ORANGE}$RUN_CMD ${RED}is not a command /!\\ ${NC}"
         echo ""

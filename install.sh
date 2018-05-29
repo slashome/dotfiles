@@ -20,7 +20,7 @@ source ./program_list.sh
 createLink ./scripts $HOME/scripts
 createLink scripts/script-launcher.sh /usr/bin/sl 1
 
-createLink scripts/qb-profiles.sh /usr/bin/qb 1
+createLink scripts/src/bin/qb /usr/bin/qb 1
 
 # #################### #
 #                      #
