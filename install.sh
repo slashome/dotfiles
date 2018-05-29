@@ -6,8 +6,8 @@
 #                      #
 # #################### #
 
-source ./_core/colors.sh
-source ./_core/tools.sh
+source ./scripts/core/colors.sh
+source ./scripts/core/tools.sh
 source ./program_list.sh
 
 
