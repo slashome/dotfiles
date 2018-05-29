@@ -4,7 +4,7 @@
 # doc : http://i3wm.org/docs/userguide.html
 
 # setup dualscreen layout
-exec --no-startup-id ~/.config/i3/scripts/dualscreen.sh
+exec --no-startup-id sl screen:dualscreen
 
 set $mod Mod4
 set $alt Mod1
@@ -253,7 +253,7 @@ exec --no-startup-id docker start gl-mysql
 exec --no-startup-id docker start gl-mobile-app
 
 # change wallpaper
-exec_always --no-startup-id ~/.config/i3/scripts/set-wallpaper.sh
+exec_always --no-startup-id sl screen:set-wallpaper
 
 # I3 Gaps
 for_window [class="^.*"] border pixel 1
@@ -266,7 +266,7 @@ smart_gaps on
 exec --no-startup-id synergy
 
 # start polybar
-exec_always --no-startup-id ~/.config/polybar/launch.sh
+exec_always --no-startup-id sl polybar:launch
 
 # freezed
 #exec --no-startup-id i3-msg 'workspace $ws2; exec google-chrome-stable --profile-directory="Default"'    # start Dev       dedicated chrome
