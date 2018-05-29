@@ -142,7 +142,7 @@ format-underline = ${colors.secondary}
 label = "  "
 exec = ''
 tail = true
-click-left = exec ~/.config/i3/scripts/set-wallpaper.sh
+click-left = exec sl screen:set-wallpaper
 
 [module/battery]
 type = internal/battery
