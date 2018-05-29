@@ -41,5 +41,5 @@ runner()
         exit
     fi
 
-    $RUN_PATH
+    source $RUN_PATH
 }

@@ -50,6 +50,13 @@ get_longest_name()
     done
 }
 
+function getScreenCount()
+{
+  COUNT=$(grep -Rl "curl" ./ | wc -l)
+  echo $COUNT
+  exit
+}
+
 function createFolder()
 {
   DST=$1
