@@ -98,14 +98,14 @@ function createLink()
     fi
   
     if [ -d $DST ]; then
-      printf $" ${RED}/!\ Warning, directory exist, do you want to remove it ? ${WHITE}[y/N]${NC} "
+      printf $" ${RED}/!\ Warning, directory exist, do you want to remove it ? ${WHITE}[Y/n]${NC} "
       read -n 1 -r
-      if [[ $REPLY =~ ^[Yy]$ ]]; then
-        echo -e "${RED} > ${ORANGE}Existing directory removed${NC}"
-        rm $DST
-      else
+      if [[ $REPLY =~ ^[Nn]$ ]]; then
         echo -e "${RED} > ${WHITE}Existing directory NOT removed"
         return 0
+      else
+        echo -e "${RED} > ${ORANGE}Existing directory removed${NC}"
+        rm $DST
       fi
     fi
 
