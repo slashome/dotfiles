@@ -48,7 +48,7 @@ client.background       $background
 floating_modifier $mod
 
 # lock screen
-bindsym $mod+l exec ~/.config/i3/scripts/lock.sh -l
+bindsym $mod+l exec sl screen:lock
 # bindsym $mod+l exec i3lock -c 000000 && ssh flow@192.168.2.35 pmset displaysleepnow
 # start a terminal
 bindsym $mod+Return exec urxvt
@@ -266,7 +266,7 @@ smart_gaps on
 exec --no-startup-id synergy
 
 # start polybar
-exec_always --no-startup-id sl polybar:launch
+exec_always --no-startup-id sl screen:launch-polybar
 
 # freezed
 #exec --no-startup-id i3-msg 'workspace $ws2; exec google-chrome-stable --profile-directory="Default"'    # start Dev       dedicated chrome
