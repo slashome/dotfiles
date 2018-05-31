@@ -40,7 +40,7 @@ tray-padding = 0
 [bar/dual_left]
 inherit = bar/default
 modules-left = i3 wireless-network
-modules-right = scripts cpu memory swap filesystem
+modules-right = taskwarrior cpu memory swap filesystem
 modules-center = xwindow
 tray-position = right
 tray-detached = false
@@ -107,9 +107,9 @@ interval = 10
 format = <label>
 format-underline = ${colors.foreground}
 label = "%output:0:30%"
-exec = ~/.config/polybar/scripts/pkg.sh
+exec = ~/.config/polybar/scripts/archupdate.sh
 exec-if = "ping -q -w 2 -c 1 176.34.135.167 > /dev/null"
-click-left = exec urxvt -e pacaur -Syyu --noconfirm --noedit; ~.config/polybar/pkg.sh;
+click-left = exec urxvt -e trizen -Syyu --noconfirm --noedit; ~.config/polybar/archupdate.sh;
 
 [module/time-paris]
 type = custom/script
@@ -143,6 +143,15 @@ label = "  "
 exec = ''
 tail = true
 click-left = exec sl screen:set-wallpaper
+
+[module/taskwarrior]
+interval = 10
+type = custom/script
+exec = $HOME/.config/polybar/scripts/taskwarrior.sh
+format = <label>
+format-foreground = #FFF
+format-prefix = " "
+click-left = task "$((`cat /tmp/tw_polybar_id`))" done
 
 [module/battery]
 type = internal/battery
@@ -239,6 +248,11 @@ label-mounted = "  %percentage_used%%"
 label-mounted-underline = ${colors.secondary}
 label-unmounted = %mountpoint% not mounted
 label-unmounted-foreground = ${colors.foreground}
+
+[module/typespeed]
+type = custom/script
+exec = ~/.config/polybar/scripts/typespeed.sh
+tail = true
 
 [module/date]
 type = internal/date

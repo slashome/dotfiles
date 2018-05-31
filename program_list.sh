@@ -17,10 +17,12 @@ PROGRAMS=(
     'nautilus-ext-git'      # Encrypted open-source password manager in Node.js
     'stacer'                # Linux system utilities and monitoring
 
+    # - APPLICATIONS - #
     'boostnote'             # Note taking app
     'buttercup-desktop'
     'qutebrowser'           # A vim like internet browser"
     'irssi'                 # The famous IRC client"
+    'task'                  # TaskWarrior : A command-line todo list manager
     'khal'                  # A CLI agenda manager"
 
     # - DEV - #
@@ -44,6 +46,12 @@ PROGRAMS=(
     'ttf-material-design-icons'  # Material Design icons by Google
     'ttf-font-awesome'           # Iconic font designed for Bootstrap
     'ttf-twemoji-color'
+    'ttf-font-logos'
+)
+
+TO_INSTALL=(
+    'github:dylanaraps/bum'
+    'github:x70b1/polybar-scripts/tree/master/polybar-scripts/openweathermap-fullfeatured'
 )
 
 TO_FOLLOW=(
