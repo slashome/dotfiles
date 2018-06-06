@@ -28,6 +28,7 @@ PROGRAMS=(
     # - DEV - #
     'vim'
     'sublime-text-dev'
+    'mycli'
 
     # - TERMINAL - #
     'rxvt-unicode-pixbuf'   # An URxvt version that allowed picture preview in ranger
