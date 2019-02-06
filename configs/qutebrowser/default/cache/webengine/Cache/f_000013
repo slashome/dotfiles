@@ -1,0 +1,851 @@
+/* line 98, ../../shared/_theme.mixins.scss */
+.reset-button {
+  border: none;
+  margin: 0;
+  padding: 0;
+  width: auto;
+  overflow: visible;
+  background: transparent;
+  /* inherit font & color from ancestor */
+  color: inherit;
+  font: inherit;
+  /* Normalize `line-height`. Cannot be changed from `normal` in Firefox 4+. */
+  line-height: normal;
+  /* Corrects font smoothing for webkit */
+  -webkit-font-smoothing: inherit;
+  -moz-osx-font-smoothing: inherit;
+  /* Corrects inability to style clickable `input` types in iOS */
+  -webkit-appearance: none;
+  /* Remove excess padding and border in Firefox 4+ */
+}
+/* line 93, ../../shared/_theme.mixins.scss */
+.reset-button::-moz-focus-inner {
+  border: 0;
+  padding: 0;
+}
+
+/* line 6, teams.scss */
+#teams .table-list thead th {
+  padding: 19px 20px 19px 12px;
+}
+/* line 9, teams.scss */
+#teams .table-list thead th i.si {
+  font-size: 18px;
+  margin-right: 6px;
+}
+/* line 14, teams.scss */
+#teams .table-list tbody {
+  max-height: 70vh;
+}
+/* line 16, teams.scss */
+#teams .table-list tbody tr.user.hovered {
+  background-color: #e6e6e6;
+}
+/* line 19, teams.scss */
+#teams .table-list tbody .fa.fa-check {
+  color: #2c956f;
+}
+/* line 22, teams.scss */
+#teams .table-list tbody .fa.fa-times {
+  color: #c84659;
+}
+/* line 28, teams.scss */
+#teams .user .edit-link {
+  padding-top: 8px;
+  margin-right: 10px;
+  font-size: 12px;
+}
+/* line 33, teams.scss */
+#teams .user .is-selected:not(.checked) {
+  opacity: 0;
+}
+/* line 36, teams.scss */
+#teams .user .active {
+  color: #2C956F;
+}
+/* line 39, teams.scss */
+#teams .user .inactive {
+  color: #C84659;
+}
+/* line 44, teams.scss */
+#teams .user.hovered .is-selected {
+  opacity: 1;
+}
+/* line 50, teams.scss */
+#teams .user-columns-selection .dropdown-menu {
+  padding: 12px 0px 0px 0px;
+  min-width: 250px;
+}
+/* line 53, teams.scss */
+#teams .user-columns-selection .dropdown-menu h6 {
+  padding: 0 20px;
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+/* line 59, teams.scss */
+#teams .user-columns-selection .dropdown-menu .displayed-columns-list {
+  max-height: 200px;
+  overflow-y: auto;
+  padding: 0px 20px 11px 20px;
+}
+/* line 65, teams.scss */
+#teams .user-columns-selection .dropdown-menu {
+  border-radius: 2px;
+  background-color: #ffffff;
+  border: none;
+  margin-top: 3px;
+  -moz-box-shadow: 0 0 2px 0 rgba(0, 0, 0, 0.5);
+  -webkit-box-shadow: 0 0 2px 0 rgba(0, 0, 0, 0.5);
+  box-shadow: 0 0 2px 0 rgba(0, 0, 0, 0.5);
+}
+
+/* line 79, teams.scss */
+.v2 #teams-list-page .global-stats .stat-element .stat-team {
+  font-weight: 400;
+  color: #1986e0;
+}
+/* line 83, teams.scss */
+.v2 #teams-list-page .global-stats .stat-team-name {
+  display: inline-block;
+  border-bottom: 1px solid transparent;
+}
+/* line 87, teams.scss */
+.v2 #teams-list-page .global-stats .stat-team-name:hover {
+  border-bottom: 1px solid #1986e0;
+}
+/* line 90, teams.scss */
+.v2 #teams-list-page .global-stats .team-cw-count {
+  padding-top: 5px;
+  color: #ffffff;
+  font-size: 10px;
+  margin-bottom: 6px;
+  font-weight: 400;
+}
+/* line 97, teams.scss */
+.v2 #teams-list-page .global-stats .team-cw-rate {
+  color: #65b9ff;
+  font-size: 10px;
+  padding-bottom: 4px;
+  font-weight: 700;
+}
+/* line 108, teams.scss */
+.v2 #add-coworkers-page section.breadcrumb {
+  margin-bottom: 46px;
+}
+/* line 111, teams.scss */
+.v2 #add-coworkers-page section .section-padded {
+  padding: 36px 50px 10px 50px;
+}
+/* line 114, teams.scss */
+.v2 #add-coworkers-page h5 {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 37px;
+}
+/* line 119, teams.scss */
+.v2 #add-coworkers-page h6 {
+  font-size: 14px;
+  margin-bottom: 11px;
+}
+/* line 124, teams.scss */
+.v2 #add-coworkers-page .import-table td {
+  padding: 0px 30px;
+  vertical-align: top;
+}
+/* line 129, teams.scss */
+.v2 #add-coworkers-page .import-table td:first-child {
+  width: 50%;
+}
+/* line 134, teams.scss */
+.v2 #add-coworkers-page .error-section {
+  text-align: center;
+  border-top: 1px solid #e6eaed;
+}
+/* line 137, teams.scss */
+.v2 #add-coworkers-page .error-section li {
+  position: relative;
+  text-align: left;
+}
+/* line 141, teams.scss */
+.v2 #add-coworkers-page .error-section li:before {
+  content: ' ';
+  display: block;
+  width: 8px;
+  height: 8px;
+  border-radius: 4px;
+  background-color: #e7736f;
+  position: absolute;
+  left: -15px;
+  top: 2px;
+}
+/* line 153, teams.scss */
+.v2 #add-coworkers-page .success-section {
+  text-align: center;
+  border-top: 1px solid #e6eaed;
+}
+/* line 156, teams.scss */
+.v2 #add-coworkers-page .success-section li {
+  position: relative;
+  text-align: left;
+  margin-bottom: 5px;
+}
+/* line 161, teams.scss */
+.v2 #add-coworkers-page .success-section li:before {
+  content: ' ';
+  display: block;
+  width: 8px;
+  height: 8px;
+  border-radius: 4px;
+  background-color: #3DB39E;
+  position: absolute;
+  left: -15px;
+  top: 2px;
+}
+/* line 173, teams.scss */
+.v2 #add-coworkers-page .actions-section {
+  text-align: center;
+  border-top: 1px solid #e6eaed;
+}
+/* line 176, teams.scss */
+.v2 #add-coworkers-page .actions-section li {
+  position: relative;
+  text-align: left;
+  margin-bottom: 15px;
+  list-style-type: none;
+}
+/* line 182, teams.scss */
+.v2 #add-coworkers-page .actions-section li:before {
+  content: ' ';
+  display: block;
+  width: 8px;
+  height: 8px;
+  border-radius: 4px;
+  background-color: #3DB39E;
+  position: absolute;
+  left: -15px;
+  top: 2px;
+}
+/* line 199, teams.scss */
+.v2 #team-add-user form {
+  margin-top: 46px;
+}
+/* line 202, teams.scss */
+.v2 #team-add-user .dropdown-menu {
+  min-width: auto;
+}
+/* line 205, teams.scss */
+.v2 #team-add-user .success-message {
+  font-size: 14px;
+  color: #1cbb1c;
+}
+/* line 209, teams.scss */
+.v2 #team-add-user .min-match-size {
+  display: inline-block;
+  min-height: 10px;
+}
+/* line 214, teams.scss */
+.v2 #team-add-user #select-team .ui-select-choices-row:last-child {
+  text-align: center;
+  border-top: 1px solid rgba(40, 146, 233, 0.5);
+}
+/* line 219, teams.scss */
+.v2 #team-add-user .display-more-attributes {
+  position: absolute;
+  width: 100%;
+  text-align: center;
+}
+/* line 223, teams.scss */
+.v2 #team-add-user .display-more-attributes .dma-text {
+  display: inline-block;
+  padding: 0px 15px;
+  background: #F9FBFD;
+  position: relative;
+  height: 7px;
+  top: -7px;
+  color: #0062FF;
+}
+/* line 233, teams.scss */
+.v2 #team-add-user .additional-attributes {
+  background-color: #f9fbfd;
+  border-bottom: 1px solid #d6e4ee;
+}
+/* line 237, teams.scss */
+.v2 #team-add-user .user-left-company {
+  color: #FF0000;
+  border-bottom: 1px solid;
+}
+@-moz-keyframes blink-background {
+  0% {
+    background-color: #ffffff;
+  }
+  50% {
+    background-color: #ACC9FF;
+  }
+  100% {
+    background-color: #ffffff;
+  }
+}
+@-webkit-keyframes blink-background {
+  0% {
+    background-color: #ffffff;
+  }
+  50% {
+    background-color: #ACC9FF;
+  }
+  100% {
+    background-color: #ffffff;
+  }
+}
+@keyframes blink-background {
+  0% {
+    background-color: #ffffff;
+  }
+  50% {
+    background-color: #ACC9FF;
+  }
+  100% {
+    background-color: #ffffff;
+  }
+}
+/* line 246, teams.scss */
+.v2 #team-add-user .hierarchy-selector .hierarchy-selector-selected {
+  background-image: none;
+}
+/* line 250, teams.scss */
+.v2 #team-add-user *.blink .form-control {
+  -moz-animation: blink-background 0.5s;
+  -webkit-animation: blink-background 0.5s;
+  animation: blink-background 0.5s;
+}
+/* line 253, teams.scss */
+.v2 #team-add-user *.blink .ui-select-match {
+  -moz-animation: blink-background 0.5s;
+  -webkit-animation: blink-background 0.5s;
+  animation: blink-background 0.5s;
+}
+/* line 258, teams.scss */
+.v2 #team-add-user table.table-form .sk-wave {
+  margin: 0;
+  height: 13px;
+}
+/* line 261, teams.scss */
+.v2 #team-add-user table.table-form .sk-wave .sk-rect {
+  width: 4px;
+}
+/* line 268, teams.scss */
+.v2 .profile-icon {
+  display: inline-block;
+  text-align: center;
+  padding-top: 9px;
+  font-family: Lato, Arial, sans-serif;
+  text-transform: uppercase;
+  font-size: 11px;
+  line-height: 11px;
+  font-weight: 700;
+  color: #FFF;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  margin-right: 14px;
+}
+
+/* line 288, teams.scss */
+#segments .segment > table > tbody > tr > td {
+  border: 1px solid #e5e7e9;
+}
+/* line 293, teams.scss */
+#segments .segment .segment-users-list td {
+  border: none;
+}
+
+/* line 301, teams.scss */
+.v2 .segment-creation .segment-creation-form .segment-condition-array {
+  /*border: 1px solid #338bdf;*/
+  /*border-radius: 4px;*/
+  /*background: rgba(61, 151, 236, 0.05);*/
+  padding-right: 20px;
+  margin: 5px;
+  position: relative;
+  /*border-bottom: 1px solid;*/
+  /*border-top: 1px solid;*/
+  min-height: 40px;
+}
+/* line 312, teams.scss */
+.v2 .segment-creation .segment-creation-form .segment-condition-type {
+  position: absolute;
+  right: 0px;
+  top: 0px;
+}
+/* line 317, teams.scss */
+.v2 .segment-creation .segment-creation-form .subcondition {
+  border: 1px solid rgba(51, 139, 223, 0.6);
+  border-radius: 4px;
+  background: rgba(61, 151, 236, 0.05);
+  box-shadow: 3px 2px 2px 0px rgba(51, 139, 223, 0.2);
+  padding: 0px;
+}
+/* line 324, teams.scss */
+.v2 .segment-creation .segment-creation-form .segment-condition {
+  display: block;
+  margin: 5px 0px 5px 5px;
+}
+/* line 327, teams.scss */
+.v2 .segment-creation .segment-creation-form .segment-condition input.input-small {
+  padding: 6px 10px 2px 10px;
+}
+/* line 331, teams.scss */
+.v2 .segment-creation .segment-creation-form .condition-keyword {
+  padding: 10px 20px;
+}
+/* line 333, teams.scss */
+.v2 .segment-creation .segment-creation-form .condition-keyword .and, .v2 .segment-creation .segment-creation-form .condition-keyword .or {
+  text-transform: uppercase;
+}
+/* line 337, teams.scss */
+.v2 .segment-creation .segment-creation-form select {
+  background: transparent;
+  border: none;
+  font-size: 16px;
+  text-transform: uppercase;
+  color: #868686;
+  font-weight: 700;
+  height: 23px;
+}
+/* line 346, teams.scss */
+.v2 .segment-creation .segment-creation-form .sca-button {
+  background: transparent;
+  border: none;
+}
+/* line 350, teams.scss */
+.v2 .segment-creation .segment-creation-form .condition-type > .sca-button {
+  background: #338bdf;
+  color: white;
+  border-radius: 20px;
+  width: 20px;
+  height: 20px;
+  line-height: 20px;
+  font-weight: 700;
+  display: inline-block;
+  padding: 1px 6px;
+  font-size: 14px;
+  vertical-align: middle;
+  margin-bottom: 2px;
+}
+/* line 364, teams.scss */
+.v2 .segment-creation .segment-creation-form .condition-type {
+  margin-left: 20px;
+  margin-top: 12px;
+  margin-bottom: 7px;
+  display: inline-block;
+}
+/* line 370, teams.scss */
+.v2 .segment-creation .segment-creation-form .select .ui-select-container.ng-valid.ng-touched:not(.open) {
+  border-left: none !important;
+  border-right: none !important;
+  border-top: none !important;
+}
+/* line 375, teams.scss */
+.v2 .segment-creation .segment-creation-form .select .ui-select-bootstrap .ui-select-toggle > .caret {
+  color: #338bdf;
+}
+/* line 378, teams.scss */
+.v2 .segment-creation .segment-creation-form .select:not(.search-enabled) .ui-select-container:not(.open),
+.v2 .segment-creation .segment-creation-form .select.search-enabled .ui-select-container:not(.open) {
+  border: 1px solid transparent;
+  border-bottom: 1px solid #90c1f5;
+}
+/* line 382, teams.scss */
+.v2 .segment-creation .segment-creation-form .select:not(.search-enabled) .ui-select-container:not(.open) .ui-select-match,
+.v2 .segment-creation .segment-creation-form .select.search-enabled .ui-select-container:not(.open) .ui-select-match {
+  background-color: transparent;
+}
+/* line 385, teams.scss */
+.v2 .segment-creation .segment-creation-form .select:not(.search-enabled) .ui-select-container:not(.open) .form-control,
+.v2 .segment-creation .segment-creation-form .select.search-enabled .ui-select-container:not(.open) .form-control {
+  background-color: transparent;
+}
+/* line 389, teams.scss */
+.v2 .segment-creation .segment-creation-form .select .ui-select-bootstrap .ui-select-toggle {
+  padding: 8px 2px 5px 2px;
+}
+/* line 392, teams.scss */
+.v2 .segment-creation .segment-creation-form .select {
+  height: 27px;
+}
+/* line 397, teams.scss */
+.v2 .segment-creation .segment-creation-form.disabled {
+  pointer-events: none;
+}
+/* line 399, teams.scss */
+.v2 .segment-creation .segment-creation-form.disabled .condition-actions {
+  display: none;
+}
+/* line 402, teams.scss */
+.v2 .segment-creation .segment-creation-form.disabled .segment-condition-type {
+  display: none;
+}
+/* line 405, teams.scss */
+.v2 .segment-creation .segment-creation-form.disabled select {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  line-height: 22px;
+  text-indent: 1px;
+  text-overflow: '';
+}
+/* line 412, teams.scss */
+.v2 .segment-creation .segment-creation-form.disabled select::-ms-expand {
+  display: none;
+}
+/* line 415, teams.scss */
+.v2 .segment-creation .segment-creation-form.disabled .condition-type {
+  display: none;
+}
+/* line 418, teams.scss */
+.v2 .segment-creation .segment-creation-form.disabled .select .ui-select-container.ng-valid.ng-touched:not(.open) {
+  border-left: none !important;
+  border-right: none !important;
+  border-top: none !important;
+}
+/* line 423, teams.scss */
+.v2 .segment-creation .segment-creation-form.disabled .select .ui-select-bootstrap .ui-select-toggle > .caret {
+  display: none;
+}
+/* line 426, teams.scss */
+.v2 .segment-creation .segment-creation-form.disabled .select:not(.search-enabled) .ui-select-container:not(.open),
+.v2 .segment-creation .segment-creation-form.disabled .select.search-enabled .ui-select-container:not(.open) {
+  border: 1px solid transparent;
+}
+/* line 432, teams.scss */
+.v2 .segment-creation .segment-form {
+  margin-bottom: 10px;
+}
+/* line 434, teams.scss */
+.v2 .segment-creation .segment-form td {
+  padding: 10px 5px;
+  vertical-align: top;
+}
+/* line 438, teams.scss */
+.v2 .segment-creation .segment-form td:not-:first-child {
+  padding-left: 15px;
+}
+/* line 441, teams.scss */
+.v2 .segment-creation .segment-form label {
+  margin-top: 10px;
+}
+
+/* line 449, teams.scss */
+#hierarchies .multi-select.hierarchy-creation-select {
+  height: auto;
+  margin-bottom: 20px;
+}
+/* line 452, teams.scss */
+#hierarchies .multi-select.hierarchy-creation-select .ui-select-match-item.btn.btn-default {
+  padding: 8px 15px 8px 15px;
+}
+/* line 456, teams.scss */
+#hierarchies .hierarchy {
+  font-size: 0px;
+  white-space: nowrap;
+}
+/* line 460, teams.scss */
+#hierarchies .hierarchy * {
+  white-space: initial;
+  font-size: 12px;
+}
+/* line 464, teams.scss */
+#hierarchies .hierarchy .hierarchy-level {
+  display: inline-block;
+  vertical-align: top;
+  min-width: 150px;
+  max-width: 250px;
+  margin-left: -1px;
+}
+/* line 471, teams.scss */
+#hierarchies .hierarchy .hierarchy-level .hl-title {
+  padding: 12px 24px;
+  background: rgba(242, 244, 247, 0.33);
+  border: 1px solid #e5e7e9;
+  text-align: center;
+  font-weight: 700;
+}
+/* line 478, teams.scss */
+#hierarchies .hierarchy .hierarchy-level .hl-elements {
+  border-left: 1px solid #e5e7e9;
+  border-right: 1px solid #e5e7e9;
+  padding: 4px;
+  padding-bottom: 25px;
+}
+/* line 484, teams.scss */
+#hierarchies .hierarchy .hierarchy-level .hl-element {
+  padding: 10px 12px;
+  border: 1px solid #e5e7e9;
+  margin-bottom: 4px;
+}
+/* line 489, teams.scss */
+#hierarchies .hierarchy .hierarchy-level .hl-element .hle-options-dropdown .dm-action {
+  padding: 6px 12px;
+  color: #384555;
+}
+/* line 493, teams.scss */
+#hierarchies .hierarchy .hierarchy-level .hl-element .hle-options-dropdown .dm-action:hover {
+  background-color: #3794ff;
+  color: white;
+}
+/* line 499, teams.scss */
+#hierarchies .hierarchy .hierarchy-level .hl-element.selected {
+  background: #379fff;
+  color: #ffffff;
+  font-weight: 700;
+  border-color: #3776b1;
+}
+
+/* line 525, teams.scss */
+.hierarchy-selector .dropdown-menu {
+  width: 100%;
+  cursor: initial;
+  margin-bottom: 30px;
+  margin-top: 0;
+  border: 1px solid #338bdf;
+  border-top: none;
+  border-radius: 0;
+}
+/* line 534, teams.scss */
+.hierarchy-selector .hsd-breadcrumb {
+  padding: 10px 24px;
+  font-size: 12px;
+  font-weight: 400;
+}
+/* line 539, teams.scss */
+.hierarchy-selector .hsd-choices {
+  font-size: 12px;
+  font-weight: 400;
+  margin-bottom: 20px;
+  margin-top: 5px;
+  padding: 0px 24px;
+}
+/* line 546, teams.scss */
+.hierarchy-selector .hsd-choices > table > tbody > tr > td {
+  vertical-align: top;
+}
+/* line 549, teams.scss */
+.hierarchy-selector .hsd-choices > table > tbody > tr > td:first-child {
+  padding-top: 10px !important;
+  font-weight: 700;
+  width: 100px;
+  text-align: right;
+  padding-right: 7px;
+}
+/* line 556, teams.scss */
+.hierarchy-selector .hsd-choices .hsdcl-element {
+  border: 1px solid #d6e4ee;
+  padding: 9px 12px 7px 12px;
+  border-bottom: none;
+  font-weight: 400;
+}
+/* line 562, teams.scss */
+.hierarchy-selector .hsd-choices .hsdcl-element:last-child {
+  border-bottom: 1px solid #d6e4ee;
+}
+/* line 565, teams.scss */
+.hierarchy-selector .hsd-choices .hsdcl-element:hover {
+  background: #efefef;
+  color: #242c36;
+  text-decoration: underline;
+}
+/* line 571, teams.scss */
+.hierarchy-selector .hsd-choice-list {
+  max-height: 300px;
+  overflow-y: auto;
+}
+/* line 575, teams.scss */
+.hierarchy-selector .hsd-nochoices {
+  text-align: center;
+  line-height: 25px;
+  padding: 20px;
+}
+/* line 580, teams.scss */
+.hierarchy-selector .hsd-breadcrumb-element {
+  font-weight: 400;
+  display: inline-block;
+}
+/* line 584, teams.scss */
+.hierarchy-selector .hsd-footer {
+  text-align: right;
+  padding: 10px 24px;
+}
+/* line 588, teams.scss */
+.hierarchy-selector .hierarchy-selector-selected {
+  border: 1px solid #d3e2ed;
+  border-radius: 1px;
+  color: #384555;
+  width: 100%;
+  font-size: 12px;
+  box-shadow: none;
+  outline: none;
+  background-image: url('data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4gPHN2ZyB2ZXJzaW9uPSIxLjEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PGxpbmVhckdyYWRpZW50IGlkPSJncmFkIiBncmFkaWVudFVuaXRzPSJvYmplY3RCb3VuZGluZ0JveCIgeDE9IjAuNSIgeTE9IjEuMCIgeDI9IjAuNSIgeTI9IjAuMCI+PHN0b3Agb2Zmc2V0PSIwJSIgc3RvcC1jb2xvcj0iI2ZmZmZmZiIvPjxzdG9wIG9mZnNldD0iMTAwJSIgc3RvcC1jb2xvcj0iI2Y5ZmJmZCIvPjwvbGluZWFyR3JhZGllbnQ+PC9kZWZzPjxyZWN0IHg9IjAiIHk9IjAiIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JhZCkiIC8+PC9zdmc+IA==');
+  background-size: 100%;
+  background-image: -webkit-gradient(linear, 50% 100%, 50% 0%, color-stop(0%, #ffffff), color-stop(100%, #f9fbfd));
+  background-image: -moz-linear-gradient(bottom, #ffffff, #f9fbfd);
+  background-image: -webkit-linear-gradient(bottom, #ffffff, #f9fbfd);
+  background-image: linear-gradient(to top, #ffffff, #f9fbfd);
+  padding: 11px 10px 9px 10px;
+  line-height: 1em;
+  font-weight: 400;
+  vertical-align: middle;
+}
+/* line 591, teams.scss */
+.hierarchy-selector .hierarchy-selector-selected.active {
+  border: 1px solid #3794ff;
+}
+
+/* line 596, teams.scss */
+.hierarchy-tree-element ul.hierarchy-tree-children {
+  padding: 0;
+  margin: 0;
+  list-style-type: none;
+}
+
+/* line 601, teams.scss */
+.hte-text {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  width: 500px;
+  display: inline-block;
+}
+
+/* line 608, teams.scss */
+.hierarchy-tree-open > .hierarchy-tree-deploy {
+  background-position: -132px -4px;
+}
+
+/* line 611, teams.scss */
+.hierarchy-tree-closed > .hierarchy-tree-deploy {
+  background-position: -100px -4px;
+}
+
+/* line 614, teams.scss */
+.hierarchy-tree-leaf > .hierarchy-tree-deploy {
+  background-position: -68px -4px;
+}
+
+/* line 617, teams.scss */
+.hierarchy-tree-node.hierarchy-tree-last, .hierarchy-tree-node:last-child {
+  background: 0 0;
+}
+
+/* line 620, teams.scss */
+.hierarchy-tree-icon.fa.fa-user {
+  background-image: none;
+  float: left;
+  font-size: 14px;
+}
+
+/* line 625, teams.scss */
+.hierarchy-tree-anchor {
+  line-height: 24px;
+  height: 24px;
+  display: inline-block;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  padding: 0 4px 0 1px;
+  margin: 0;
+  vertical-align: top;
+  width: calc(100% - 20px);
+}
+/* line 635, teams.scss */
+.hierarchy-tree-anchor > table {
+  width: calc(100% - 24px);
+}
+
+/* line 639, teams.scss */
+.hierarchy-tree-icon {
+  background-image: url(/img/app/hierarchy-tree.png);
+  width: 20px;
+  height: 24px;
+  line-height: 24px;
+  color: #d89381;
+  display: inline-block;
+  text-decoration: none;
+  margin: 0;
+  float: left;
+  padding: 0;
+  vertical-align: top;
+  text-align: center;
+  background-repeat: no-repeat;
+  background-color: transparent;
+}
+
+/* line 655, teams.scss */
+.hierarchy-tree-node {
+  background-image: url(/img/app/hierarchy-tree.png);
+  display: block;
+  margin: 0;
+  padding: 0;
+  min-height: 24px;
+  line-height: 24px;
+  margin-left: 20px;
+  list-style-type: none;
+  list-style-image: none;
+  background-position: -292px -4px;
+  background-repeat: repeat-y;
+}
+
+/* line 668, teams.scss */
+.hierarchy-tree-node a {
+  color: #384555;
+}
+
+/* line 671, teams.scss */
+.hierarchy-tree-node a:hover {
+  background: #e0f5ff;
+  border-radius: 2px;
+  box-shadow: inset 0 0 1px #999;
+}
+
+/* line 676, teams.scss */
+.hierarchy-tree-node a.hierarchy-tree-anchor.selected {
+  background: #ABDCF3;
+  border-radius: 2px;
+  box-shadow: inset 0 0 1px #999;
+}
+
+/* line 684, teams.scss */
+.v2 .teams-columns-dropdown .btn {
+  border: 1px solid #d3e2ed;
+  border-radius: 1px;
+  color: #384555;
+  width: 100%;
+  font-size: 12px;
+  box-shadow: none;
+  outline: none;
+  background-image: url('data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4gPHN2ZyB2ZXJzaW9uPSIxLjEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PGxpbmVhckdyYWRpZW50IGlkPSJncmFkIiBncmFkaWVudFVuaXRzPSJvYmplY3RCb3VuZGluZ0JveCIgeDE9IjAuNSIgeTE9IjEuMCIgeDI9IjAuNSIgeTI9IjAuMCI+PHN0b3Agb2Zmc2V0PSIwJSIgc3RvcC1jb2xvcj0iI2ZmZmZmZiIvPjxzdG9wIG9mZnNldD0iMTAwJSIgc3RvcC1jb2xvcj0iI2Y5ZmJmZCIvPjwvbGluZWFyR3JhZGllbnQ+PC9kZWZzPjxyZWN0IHg9IjAiIHk9IjAiIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JhZCkiIC8+PC9zdmc+IA==');
+  background-size: 100%;
+  background-image: -webkit-gradient(linear, 50% 100%, 50% 0%, color-stop(0%, #ffffff), color-stop(100%, #f9fbfd));
+  background-image: -moz-linear-gradient(bottom, #ffffff, #f9fbfd);
+  background-image: -webkit-linear-gradient(bottom, #ffffff, #f9fbfd);
+  background-image: linear-gradient(to top, #ffffff, #f9fbfd);
+  padding: 11px 10px 9px 10px;
+  line-height: 1em;
+  font-weight: 400;
+  vertical-align: middle;
+  padding: 12px 13px 11px 19px;
+  animation: 1s;
+}
+/* line 688, teams.scss */
+.v2 .teams-columns-dropdown .btn:hover {
+  box-shadow: none !important;
+  -webkit-box-shadow: none !important;
+}
+/* line 694, teams.scss */
+.v2 .teams-columns-dropdown.open .btn, .v2 .teams-columns-dropdown.open .dropdown-menu {
+  border: 1px solid #3794ff !important;
+}
+/* line 697, teams.scss */
+.v2 .teams-columns-dropdown.open .dropdown-menu {
+  margin-top: 0 !important;
+  top: 35px;
+  box-shadow: none !important;
+  -webkit-box-shadow: none !important;
+}

@@ -1,0 +1,496 @@
+/* globals moment, XLSX, ArrayBuffer, Uint8Array */
+(function () {
+  angular
+    .module('app.campaigns.pulse')
+    .controller('app.campaigns.pulse.ExportController', ExportController);
+
+  ExportController.$inject = ['User', 'company', 'HierarchiesService', 'hierarchies', '$timeout', '$stateParams', 'ErrorReporter', '$scope', 'CampaignAnalysisResource', 'Question', '$q', 'SurveyAnalysisService', 'ParallelRequestor', 'XlsExport'];
+
+  function ExportController(User, company, HierarchiesService, hierarchies, $timeout, $stateParams, ErrorReporter, $scope, CampaignAnalysisResource, Question, $q, SurveyAnalysisService, ParallelRequestor, XlsExport) {
+    // controller code
+    var vm = this;
+    var campaignId = parseInt($stateParams.campaignId, 10);
+    vm.campaignId = campaignId;
+
+    vm.hierarchies = hierarchies;
+
+    vm.download = download;
+    vm.selectClosedQuestions = selectClosedQuestions;
+    vm.selectOpenQuestions = selectOpenQuestions;
+    vm.questionType = 'closed';
+
+    vm.maxDate = moment();
+    vm.startDate = moment();
+    vm.endDate = moment();
+
+    vm.nothingToDownload = false;
+
+    if (vm.hierarchies.length === 0) {
+      vm.hierarchyRoot = {
+        value: company.name,
+        join: function () { return company.name; },
+      };
+      vm.selectedElement = vm.hierarchyRoot;
+      vm.htOptions = { listSelected: [angular.copy(vm.selectedElement)] };
+      return;
+    }
+
+    var getBaseElement = function () {
+      if (User.userType === 'Manager') {
+        var userRights = User.getCampaignRights(campaignId);
+        if (userRights && !(!userRights.hierarchyKey)) {
+          return vm.hierarchyRoot.findFirstMatchingAll({ key: userRights.hierarchyKey }).findFirstDisplayableElement();
+        }
+      }
+      return vm.hierarchyRoot.findFirstDisplayableElement();
+    };
+
+    vm.hierarchyRoot = HierarchiesService.getElementsTree(vm.hierarchies[0]);
+    vm.confirmHierarchySelection = confirmHierarchySelection;
+    vm.cancelHierarchySelection = cancelHierarchySelection;
+
+    vm.htOptions = {
+      listSelected: [],
+      shouldBeDisplayed: function (element) {
+        if (vm.removeNonFilterable) {
+          return !element.forbidden || element.mightDisplayChildren;
+        }
+        return true;
+      },
+      isLeaf: function (element) {
+        if (vm.removeNonFilterable && element.children && element.children.length) {
+          // if we find in all children, one wich should be displayed, we're not a leaf
+          return !_.find(element.children, function (child) {
+            return vm.htOptions.shouldBeDisplayed(child);
+          });
+        }
+        return !(element.children && element.children.length);
+      },
+      isSelectable: function (element) {
+        var userRights = User.getCampaignRights(campaignId);
+        if (userRights && !(!userRights.hierarchyKey)) {
+          // allow to select elements of which user's rights hierarchy key is a parent
+          return HierarchiesService.isAncestorOf(userRights.hierarchyKey, element.key);
+        }
+        return true; // user is admin, so he's not restricted to some elements
+      },
+      onSelect: function (element) {
+        if (!this.isSelectable(element)) {
+          ErrorReporter.reportError('cde_notSelectable');
+          superAnalytics.track('CampaignFeatures', {
+            name: 'export',
+            action: 'Tried to select for export a forbidden population',
+            companyId: company.id,
+          });
+          return;
+        }
+        element.selected = !element.selected;
+        var index = _.findIndex(vm.htOptions.listSelected, function (el) { return el.key === element.key; });
+        if (index > -1) {
+          vm.htOptions.listSelected.splice(index, 1);
+          return;
+        }
+        vm.htOptions.listSelected.push(element);
+        if (typeof hierarchies[0] !== 'undefined') {
+          vm.htOptions.listSelected = hierarchies[0].sortElementList(vm.htOptions.listSelected);
+        }
+      },
+    };
+    vm.htOptions.onSelect(getBaseElement());
+
+    $scope.$watch('expCtrl.searchHierarchy', function () {
+      var search = vm.searchHierarchy;
+
+      vm.hierarchyRoot.searchRecursive(search);
+      vm.hierarchyRoot.refreshDisplayModesChain();
+      vm.hierarchyRoot.refreshDisplayChildrenModes();
+    });
+
+
+    /* ------------------ */
+
+    function confirmHierarchySelection() {
+      vm.isHierarchySelectorOpened = false;
+    }
+
+    function cancelHierarchySelection() {
+      vm.isHierarchySelectorOpened = false;
+    }
+
+    function selectClosedQuestions() {
+      vm.questionType = 'closed';
+    }
+    function selectOpenQuestions() {
+      vm.questionType = 'open';
+    }
+
+    function download() {
+      superAnalytics.track('CampaignFeatures', {
+        name: 'export',
+        action: 'Attempt to export results',
+        companyId: company.id,
+        startDate: vm.startDate,
+        endDate: vm.endDate,
+        populationsCount: vm.htOptions.listSelected.length,
+      });
+      vm.nothingToDownload = false;
+      if (vm.startDate > vm.endDate) {
+        vm.incompatibleDates = true;
+        $timeout(function () {
+          vm.incompatibleDates = false;
+        }, 800);
+      }
+      if (vm.htOptions.listSelected.length === 0) {
+        vm.noPopulationSelected = true;
+        $timeout(function () {
+          vm.noPopulationSelected = false;
+        }, 800);
+      }
+      if (vm.startDate > vm.endDate || vm.htOptions.listSelected.length === 0 || vm.loading) { // disable button while previous loading is in progress
+        superAnalytics.track('CampaignFeatures', {
+          name: 'export',
+          action: 'Fail to export results',
+          companyId: company.id,
+          startDate: vm.startDate,
+          endDate: vm.endDate,
+          populationsCount: vm.htOptions.listSelected.length,
+          reason: (vm.startDate > vm.endDate ? 'Incompatible dates. ' : '') + (vm.noPopulationSelected ? 'No population selected. ' : '') + (vm.loading ? 'Still loading previous results.' : ''),
+        });
+        return;
+      }
+      if (vm.questionType === 'closed') {
+        downloadClosedQuestions();
+      } else if (vm.questionType === 'open') {
+        downloadOpenQuestions();
+      }
+    }
+
+    function computeStatistics(h) { // takes an histogram h as input
+      var tot = h[1] + h[2] + h[3] + h[4] + h[5]; // tot is the total number of answers
+      var mean = (h[1] * 1 + h[2] * 2 + h[3] * 3 + h[4] * 4 + h[5] * 5) / tot;
+      var stddev = Math.round(Math.sqrt((h[1] * 1 * 1 + h[2] * 2 * 2 + h[3] * 3 * 3 + h[4] * 4 * 4 + h[5] * 5 * 5) / tot - mean * mean) * 100) / 100;
+      return { 'answerCount': tot, 'mean': Math.round(mean * 100) / 100, 'stddev': stddev }; // round mean only after using the real value for computing variance to preserve precision
+    }
+
+    function downloadClosedQuestions() {
+      CampaignAnalysisResource.getClosedQuestions({ companyId: company.id, campaignId: campaignId, from: moment(vm.startDate).format('YYYY-MM-DD'), to: moment(vm.endDate).format('YYYY-MM-DD HH:mm:ss') })
+        .$promise
+        .then(function (data) {
+          var closedQuestions = Question.parseArray(data);
+          vm.closedQuestions = closedQuestions;
+          _.forEach(vm.closedQuestions, function (q) {
+            q.histograms = {};
+          });
+          return closedQuestions;
+        })
+        .then(function (closedQuestions) {
+          vm.surveysList = _.uniq(_.map(closedQuestions, 'surveyId'));
+          vm.surveysTimesHierarchyElements = [];
+          if (vm.surveysList.length === 0) {
+            vm.nothingToDownload = true;
+            superAnalytics.track('CampaignFeatures', {
+              name: 'export',
+              action: 'Fail to export results',
+              companyId: company.id,
+              startDate: vm.startDate,
+              endDate: vm.endDate,
+              populationsCount: vm.htOptions.listSelected.length,
+              reason: 'Nothing to download',
+            });
+            return $q.reject('Nothing to download');
+          }
+          _.forEach(vm.surveysList, function (s) {
+            _.forEach(vm.htOptions.listSelected, function (h) {
+              vm.surveysTimesHierarchyElements.push({ 'surveyId': s, 'hierarchyKey': h.key });
+            });
+          });
+          vm.loading = true;
+          vm.loaderProgress = 0;
+          vm.loaderMax = vm.surveysTimesHierarchyElements.length;
+
+          var requests = _.map(vm.surveysTimesHierarchyElements, function (surveyTimesHierarchyElement) {
+            return function () {
+              return SurveyAnalysisService.getHistograms(company.id, surveyTimesHierarchyElement.surveyId, surveyTimesHierarchyElement.hierarchyKey)
+                .then(function (data) {
+                  var closedQuestionsList = [];
+                  _.forEach(Object.keys(data), function (d) {
+                    var closedQuestion = _.find(vm.closedQuestions, function (q) { return parseInt(q.id, 10) === parseInt(d, 10); });
+                    if (closedQuestion) {
+                      var h = data[d];
+                      var statsObj = computeStatistics(h);
+                      closedQuestion.histograms[surveyTimesHierarchyElement.hierarchyKey] = $.extend(h, statsObj);
+                      closedQuestionsList.push(closedQuestion);
+                    }
+                  });
+                  return closedQuestionsList;
+                }, function (error) {
+                  var closedQuestionsList = [];
+                  if (error.data.error === 'ERROR_BREAKING_ANONIMITY') {
+                    _.forEach(vm.closedQuestions, function (q) {
+                      if (q.surveyId === surveyTimesHierarchyElement.surveyId) {
+                        q.histograms[surveyTimesHierarchyElement.hierarchyKey] = { 'answerCount': error.data.reason };
+                        closedQuestionsList.push(q);
+                      }
+                    });
+                  }
+                  return closedQuestionsList; // we need this to load the peopleCount even if the request fails because of anonymity
+                })
+                .then(function (closedQuestionsList) {
+                  return SurveyAnalysisService.getHierarchyAnswerStatistics(company.id, surveyTimesHierarchyElement.surveyId)
+                    .then(function (data) {
+                      _.forEach(closedQuestionsList, function (q) {
+                        if (vm.hierarchies.length === 0) {
+                          q.histograms.undefined.peopleCount = data[0].peopleCount;
+                        } else {
+                          var peopleCountData = _.find(data, function (peopleCountByKey) { return peopleCountByKey.key === surveyTimesHierarchyElement.hierarchyKey; });
+                          q.histograms[surveyTimesHierarchyElement.hierarchyKey].peopleCount = peopleCountData.peopleCount;
+                        }
+                      });
+                      return;
+                    });
+                })
+                .finally(function () {
+                  vm.loaderProgress += 1;
+                });
+            };
+          });
+          return ParallelRequestor.parallelizeRequests(requests, 10);
+        })
+        .then(function () {
+          return formatXlsWorkbookClosedQuestions();
+        })
+        .then(function () {
+          return XlsExport.downloadWorkbook([vm.xls], 'dataExport.xlsx');
+        })
+        .then(function () {
+          superAnalytics.track('CampaignFeatures', {
+            name: 'export',
+            action: 'Export results successfully',
+            questionType: 'Closed',
+            companyId: company.id,
+            startDate: vm.startDate,
+            endDate: vm.endDate,
+            populationsCount: vm.htOptions.listSelected.length,
+          });
+        })
+        .finally(function () {
+          vm.loading = false;
+        });
+    }
+
+    function shuffle(a) { // shuffle an array in place
+      for (var i = a.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var x = a[i];
+        a[i] = a[j];
+        a[j] = x;
+      }
+    }
+
+    function downloadOpenQuestions() {
+      CampaignAnalysisResource.getOpenQuestions({ companyId: company.id, campaignId: campaignId, from: moment(vm.startDate).format('YYYY-MM-DD'), to: moment(vm.endDate).format('YYYY-MM-DD HH:mm:ss') })
+        .$promise
+        .then(function (data) {
+          var openQuestions = Question.parseArray(data);
+          vm.openQuestions = openQuestions;
+          _.forEach(vm.openQuestions, function (q) {
+            q.verbatims = {};
+          });
+          return openQuestions;
+        })
+        .then(function (openQuestions) {
+          vm.surveysList = _.uniq(_.map(openQuestions, 'surveyId'));
+          vm.surveysTimesHierarchyElements = [];
+          if (vm.surveysList.length === 0) {
+            vm.nothingToDownload = true;
+            superAnalytics.track('CampaignFeatures', {
+              name: 'export',
+              action: 'Fail to export results',
+              companyId: company.id,
+              startDate: vm.startDate,
+              endDate: vm.endDate,
+              populationsCount: vm.htOptions.listSelected.length,
+              reason: 'Nothing to download',
+            });
+            return $q.reject('Nothing to download');
+          }
+          _.forEach(vm.surveysList, function (s) {
+            _.forEach(vm.htOptions.listSelected, function (h) {
+              vm.surveysTimesHierarchyElements.push({ 'surveyId': s, 'hierarchyKey': h.key });
+            });
+          });
+          vm.loading = true;
+          vm.loaderProgress = 0;
+          vm.loaderMax = vm.surveysTimesHierarchyElements.length;
+
+          var requests = _.map(vm.surveysTimesHierarchyElements, function (surveyTimesHierarchyElement) {
+            return function () {
+              return SurveyAnalysisService.getVerbatims(company.id, surveyTimesHierarchyElement.surveyId, surveyTimesHierarchyElement.hierarchyKey)
+                .then(function (data) {
+                  var openQuestionsList = [];
+                  _.forEach(Object.keys(data), function (d) {
+                    var openQuestion = _.find(vm.openQuestions, function (q) { return parseInt(q.id, 10) === parseInt(d, 10); });
+                    if (openQuestion) {
+                      shuffle(data[d]);
+                      openQuestion.verbatims[surveyTimesHierarchyElement.hierarchyKey] = { 'data': data[d], 'answerCount': data[d].length };
+                      openQuestionsList.push(openQuestion);
+                    }
+                  });
+                  return openQuestionsList;
+                }, function (error) {
+                  var openQuestionsList = [];
+                  if (error.data.error === 'ERROR_BREAKING_ANONIMITY') {
+                    _.forEach(vm.openQuestions, function (openQuestion) {
+                      if (openQuestion.surveyId === surveyTimesHierarchyElement.surveyId) {
+                        openQuestion.verbatims[surveyTimesHierarchyElement.hierarchyKey] = { 'error': error.data.error, 'data': [{ 'text': error.data.reason }], 'answerCount': error.data.has };
+                        openQuestionsList.push(openQuestion);
+                      }
+                    });
+                  }
+                  return openQuestionsList;
+                })
+                .then(function (openQuestionsList) {
+                  return SurveyAnalysisService.getHierarchyAnswerStatistics(company.id, surveyTimesHierarchyElement.surveyId)
+                    .then(function (data) {
+                      _.forEach(openQuestionsList, function (q) {
+                        if (vm.hierarchies.length === 0) {
+                          q.verbatims.undefined.peopleCount = data[0].peopleCount;
+                        } else {
+                          var peopleCountData = _.find(data, function (peopleCountByKey) { return peopleCountByKey.key === surveyTimesHierarchyElement.hierarchyKey; });
+                          q.verbatims[surveyTimesHierarchyElement.hierarchyKey].peopleCount = peopleCountData.peopleCount;
+                        }
+                      });
+                      return;
+                    });
+                })
+                .finally(function () {
+                  vm.loaderProgress += 1;
+                });
+            };
+          });
+          return ParallelRequestor.parallelizeRequests(requests, 10);
+        })
+        .then(function () {
+          return formatXlsWorkbookOpenQuestions();
+        })
+        .then(function () {
+          return XlsExport.downloadWorkbook([vm.xls], 'dataExport.xlsx');
+        })
+        .then(function () {
+          superAnalytics.track('CampaignFeatures', {
+            name: 'export',
+            action: 'Export results successfully',
+            questionType: 'Open',
+            companyId: company.id,
+            startDate: vm.startDate,
+            endDate: vm.endDate,
+            populationsCount: vm.htOptions.listSelected.length,
+          });
+        })
+        .finally(function () {
+          vm.loading = false;
+        });
+    }
+
+    function formatXlsWorkbookClosedQuestions() {
+      vm.xls = [];
+      var additionalColumnWidth = 1 + (vm.includeHistogram ? 5 : 0) + (vm.includeStddev ? 1 : 0);
+
+      var header1 = ['', '', ''];
+      _.forEach(vm.htOptions.listSelected, function (hierarchyElement) {
+        header1.push((hierarchyElement.key ? hierarchyElement.key : ''), hierarchyElement.value);
+        Array.prototype.push.apply(header1, _.fill(Array(additionalColumnWidth)));
+      });
+      vm.xls.push(header1);
+
+      var header2 = ['questionModelId', 'formulation', 'askedAt'];
+      _.forEach(vm.htOptions.listSelected, function () {
+        header2.push('interrogatedPeople', 'totalNumberOfAnswers', 'mean');
+        if (vm.includeStddev) {
+          header2.push('standardDeviation');
+        }
+        if (vm.includeHistogram) {
+          header2.push('numberOf1', 'numberOf2', 'numberOf3', 'numberOf4', 'numberOf5');
+        }
+      });
+      vm.xls.push(header2);
+
+      var questionRow = [];
+      _.forEach(vm.closedQuestions, function (q) {
+        questionRow = [formatInt(q.questionModelId), q.getQuestionText(), q.askedAt];
+        _.forEach(vm.htOptions.listSelected, function (hierarchyElement) {
+          var hist = q.histograms[hierarchyElement.key];
+          questionRow.push(formatInt(hist.peopleCount), formatInt(hist.answerCount), hist.mean);
+          if (vm.includeStddev) {
+            questionRow.push(hist.stddev);
+          }
+          if (vm.includeHistogram) {
+            questionRow.push(formatInt(hist[1]), formatInt(hist[2]), formatInt(hist[3]), formatInt(hist[4]), formatInt(hist[5]));
+          }
+        });
+        vm.xls.push(questionRow);
+      });
+      return;
+    }
+
+    function formatInt(i) {
+      return (typeof i === 'number' ? i.toFixed(0) : i);
+    }
+
+    function formatXlsWorkbookOpenQuestions() {
+      vm.xls = [];
+      var additionalColumnWidth = 1 + (vm.includePolarity ? 1 : 0) + (vm.includeValence ? 1 : 0);
+
+      var header1 = ['', '', ''];
+      _.forEach(vm.htOptions.listSelected, function (hierarchyElement) {
+        header1.push((hierarchyElement.key ? hierarchyElement.key : ''), hierarchyElement.value);
+        Array.prototype.push.apply(header1, _.fill(Array(additionalColumnWidth), ''));
+      });
+      vm.xls.push(header1);
+
+      var header2 = ['questionModelId', 'formulation', 'askedAt'];
+      _.forEach(vm.htOptions.listSelected, function () {
+        header2.push('interrogatedPeople', 'totalVerbatims', 'displayableVerbatims');
+        if (vm.includePolarity) {
+          header2.push('polarity');
+        }
+        if (vm.includeValence) {
+          header2.push('valence');
+        }
+      });
+      vm.xls.push(header2);
+
+      var keys = _.map(vm.htOptions.listSelected, function (hierarchyElement) { return hierarchyElement.key; });
+      var questionRow = [];
+      _.forEach(vm.openQuestions, function (q) {
+        var maxVerbatimsCount = _.reduce(q.verbatims, function (carry, item) { if (item.data && item.answerCount > carry) { return item.answerCount; } return carry; }, 0);
+        for (var i = 0; i < maxVerbatimsCount; i++) {
+          if (i === 0) {
+            questionRow = [formatInt(q.questionModelId), q.getQuestionText(), q.askedAt]; // first data row should exhibit info about the question
+          } else {
+            questionRow = ['', '', ''];
+          }
+          for (var j = 0; j < keys.length; j++) {
+            var currentKey = keys[Object.keys(keys)[j]];
+            var verb = q.verbatims[currentKey];
+            if (i === 0) {
+              questionRow.push(formatInt(verb.peopleCount), formatInt(verb.answerCount)); // first data row should exhibit total number of verbatims
+            } else {
+              questionRow.push('', '');
+            }
+            var hasIthElement = verb.data && typeof verb.data[i] !== 'undefined';
+            questionRow.push((hasIthElement ? verb.data[i].text : ''));
+            if (vm.includePolarity) {
+              questionRow.push((hasIthElement ? verb.data[i].polarity : ''));
+            }
+            if (vm.includeValence) {
+              questionRow.push((hasIthElement ? verb.data[i].valence : ''));
+            }
+          }
+          vm.xls.push(questionRow);
+        }
+      });
+      return;
+    }
+  }
+})();

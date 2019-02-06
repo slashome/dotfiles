@@ -18,3 +18,5 @@ vim/autoload
 # Hide some secret files to indiscreet eyes
 zsh/.zsh_aliases_secret
 scripts/config/secrets.cfg
+
+userscripts/

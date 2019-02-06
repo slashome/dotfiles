@@ -1,0 +1,553 @@
+/* globals FastClick, ga, hj, routeParams */
+/* jshint maxparams:10 */
+
+var app = angular.module('app', [
+  'ui.router',
+  'ui.bootstrap',
+  'ui.select',
+  'ui.date',
+  'tinycolor',
+  'color.picker',
+  'pascalprecht.translate',
+  'tmh.dynamicLocale',
+  'ngToast',
+  'ngRights',
+  'ngResource',
+  'ngAnimate',
+  'monospaced.elastic',
+  'shared.configuration',
+  'shared.behavioral',
+  'shared.elements',
+  'shared.filters',
+  'shared.forms',
+  'shared.user',
+  'shared.surveys',
+  'app.company',
+  'app.surveys',
+  'app.dashboard',
+  'app.teams',
+  'app.backoffice',
+  'app.datalab',
+  'app.reporting',
+  'app.elements',
+  'app.billing',
+  'app.sso',
+  'app.superscore',
+  'app.superlikes',
+  'app.campaigns',
+  'app.campaigns.pulse',
+  'app.campaigns.manager',
+  'sampleapp',
+]);
+
+app.config(['$provide', '$compileProvider', '$stateProvider', '$httpProvider', '$urlRouterProvider', '$locationProvider',
+  '$translateProvider', 'ngToastProvider', '$sceDelegateProvider', 'ngRightsProvider', 'tmhDynamicLocaleProvider',
+  function ( $provide,   $compileProvider,   $stateProvider,   $httpProvider,   $urlRouterProvider,   $locationProvider,
+   $translateProvider,   ngToastProvider,   $sceDelegateProvider,   ngRightsProvider,   tmhDynamicLocaleProvider) {
+    $compileProvider.debugInfoEnabled(false);
+
+    $provide.decorator('$state', ['$delegate', '$rootScope', function ($delegate, $rootScope) {
+      $rootScope.$on('$stateChangeStart', function (event, state, params) {
+        $delegate.next = state;
+        $delegate.toParams = params;
+      });
+      return $delegate;
+    }]);
+
+    if (window.environment !== 'dev') {
+      $provide.decorator('$exceptionHandler', ['$delegate', '$window', function ($delegate, $window) {
+        return function (exception) {
+          if ($window.trackJs) {
+            // Track error and log anything else of interest.
+            $window.trackJs.track(exception);
+          }
+
+          // In *non-production* environments you may still want the error sent to the console.
+          // You can delegate to the original handler (console.error) if you'd like.
+          // Warning, this can cause double tracking of errors, so do not use in production.
+          // if (window.environment === 'dev') {
+          //   $delegate(exception, cause);
+          // }
+        };
+      }]);
+    }
+
+    $sceDelegateProvider.resourceUrlWhitelist([
+      // Allow same origin resource loads.
+      'self',
+      // Allow loading from our static files (behind CDN) domain.
+      window.STATIC_ORIGIN + '/**',
+    ]);
+
+    $stateProvider.
+    state('app', {
+      url: '',
+      controller: 'AppController',
+      templateUrl: '/app/app/app.html',
+      resolve: {
+        user: ['User', '$state', '$rootScope', function (User, $state, $rootScope) {
+          User.getPromise().then(function () {
+            if (User.isDemo) {
+              $rootScope.demo.start();
+            } else {
+              var search = routeParams();
+              if (Object.keys(search).indexOf('go-to-demo') >= 0) {
+                $rootScope.demo.start();
+              } else {
+                User.loadFavoriteCampaigns();
+              }
+            }
+          }, function () {
+            if (window.location.href.indexOf('/login') === -1) {
+              setTimeout(function () {
+                window.location.replace('/app/#!/loginv2?redirectTo=' + encodeURIComponent(window.location));
+              }, 0);
+            }
+          });
+          return User.getPromise();
+        }],
+        company: [ 'User', 'ResourceResolver', 'CompanyResource', 'Company', '$q',
+          function (User,   ResourceResolver,   CompanyResource,   Company,   $q) {
+            var deferred = $q.defer();
+            // wait for current user to fetch the company
+            User.getPromise().then(function () {
+              // fetch, parse & resolve
+              var companyId = User.companyId;
+              var search = routeParams();
+              if (search && search.cid && !isNaN(parseInt(search.cid, 10))) {
+                companyId = search.cid;
+              }
+              User.companyId = companyId;
+              User.loadRights(companyId);
+
+              function resolveCompany(company) {
+                deferred.resolve(company);
+                superAnalytics.identify(User.id, {
+                  'formerCompanyId': User.companyId,
+                  'consultedCompanyId': company.id,
+                  'userType': User.userType,
+                });
+              }
+
+              new ResourceResolver(CompanyResource.find({ companyId: companyId }).$promise, Company.parse)
+                .then(
+                  resolveCompany,
+                  function () { // if id failed, use user company
+                    new ResourceResolver(CompanyResource.find({ companyId: User.companyId }).$promise, Company.parse).then(
+                      resolveCompany, function (error) {
+                        deferred.reject(error);
+                      }
+                    );
+                  });
+            }, function (error) {
+              deferred.reject(error);
+            });
+            return deferred.promise;
+          },
+        ],
+        categories: ['company', 'ResourceResolver', 'CompanyResource', 'Categories', 'Category', '$q',
+          function (  company,   ResourceResolver,   CompanyResource,   Categories,   Category,   $q) {
+            var deferred = $q.defer();
+            CompanyResource.getCompanyCategories({ companyId: company.id })
+              .$promise
+              .then(function (categories) {
+                Categories.replace(Category.parseArray(categories));
+                deferred.resolve(Categories);
+              }, function (error) {
+                deferred.reject(error);
+              });
+            return deferred.promise;
+          },
+        ],
+      },
+    })
+    .state('theme', {
+      url: '/theme',
+      template: '<theme></theme>',
+    })
+    .state('app.loggedIn', {
+      url: '/logged-in',
+      controller: ['company', 'User', '$state', function (company, User, $state) {
+        if (User.userType === 'Admin' || User.userType === 'Manager') {
+          $state.go('app.dashboard.dashboard');
+        }
+      }],
+      template: '',
+    })
+    .state('app.switchAccount', {
+      url: '/switch-account',
+      templateUrl: '/app/app/switchAccount.html',
+      controllerAs: 'saCtrl',
+      controller: ['Auth', function (Auth) {
+        this.otherAccounts = Auth.getAccounts();
+      }],
+    })
+    .state('app.lost', {
+      parent: 'app',
+      url: '/lost',
+      templateUrl: '/app/app/404.html',
+    })
+    .state('notAdmin', {
+      url: '/not-admin',
+      template: '<div style="width: 100%; position: fixed; text-align: center; height: 100%; margin-top: 35vh">{{ "na_hello" | translate }}<br><br>{{ "na_message" | translate }}<br><br>{{ "na_feelFree" | translate }} <a href="mailto:hello@supermood.co">{{ "na_contactUs" | translate }}</a> {{ "na_forHelp" | translate }}<br><br><a ng-click="notAdminCtrl.logout()">{{ "na_logout" | translate }}</a></div>',
+      controllerAs: 'notAdminCtrl',
+      controller: ['$state', 'User', function ($state, User) {
+        this.logout = function () {
+          User.logout().then(function () {
+            $state.go('loginv2');
+          });
+        };
+      }],
+    });
+
+    // URL Router configuration
+    $urlRouterProvider.otherwise(function ($injector) {
+      var $state = $injector.get('$state');
+
+      $state.go('app.lost', {}, {
+        location: false,
+      });
+    });
+
+    // Location provider configuration
+    $locationProvider.html5Mode({
+      enabled: false,
+      requireBase: true,
+      rewriteLinks: false,
+    }).hashPrefix('!');
+    // $locationProvider.html5Mode({
+    //   enabled: true,
+    //   requireBase: false,
+    //   rewriteLinks: false
+    // }); // remove the ugly # in the url
+
+    // translate provider configuration
+    if (window.preLoadedLanguage && window.translations) {
+      $translateProvider.fallbackLanguage(window.preLoadedLanguage);
+      $translateProvider.preferredLanguage(window.preLoadedLanguage);
+      $translateProvider.translations(window.preLoadedLanguage, window.translations);
+    }
+    $translateProvider.useSanitizeValueStrategy(null);
+    $translateProvider.useLoader('SupermoodLocaleLoader', {
+      prefix: (window.isIE9 ? '' : window.STATIC_ORIGIN) + '/lang/locale-',
+      suffix: '.json?' + window.CACHEBUSTING_VERSION,
+    });
+
+    tmhDynamicLocaleProvider.localeLocationPattern(window.STATIC_ORIGIN + '/lang/angular-locale_{{locale}}.js?v1.4.3');
+
+    $httpProvider.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
+    // handler for
+    $httpProvider.interceptors.push(['$q', '$injector', function ($q, $injector) {
+      return {
+        'request': function (request) {
+          var Auth = $injector.get('Auth');
+          var User = $injector.get('User');
+          var matches = request.url.match(/company\/(\d+)/i);
+          if (matches && !isNaN(parseInt(matches[1], 10))) {
+            var selectedCompanyId = parseInt(matches[1], 10);
+            User.selectAccount(selectedCompanyId);
+          }
+          if (Auth.getToken()) {
+            request.headers.Authorization = 'Bearer ' + Auth.getToken();
+          }
+          return request;
+        },
+        'responseError': function (response) {
+          if (parseInt(response.status, 10) === 401 && response.data && response.data.error === 'ERROR_NOT_LOGGED_IN') {
+            $injector.get('User').setLoggedOut();
+            // $injector.get('$state').go('login');
+            if (window.location.href.indexOf('/login') === -1) {
+              setTimeout(function () {
+                window.location.replace('/app/#!/loginv2?redirectTo=' + encodeURIComponent(window.location.href));
+              }, 0);
+            }
+          }
+          if (parseInt(response.status, 10) === 403 && response.data && response.data.error === 'ERROR_NOT_ADMIN') {
+            // $injector.get('$state').go('login');
+            $injector.get('$state').go('notAdmin', { location: 'replace' });
+          }
+          if (response.data && response.data.error === 'ERROR_NOT_POSSIBLE_IN_DEMO') {
+            superAnalytics.track('CallToAction', {
+              name:    'Tried to do a demo-forbidden action',
+              product: 'Demo',
+            });
+          }
+          return $q.reject(response);
+        },
+      };
+    }]);
+
+    // ng toast configuration
+    ngToastProvider.configure({
+      animation: 'slide',
+      horizontalPosition: 'middle',
+      verticalPosition: 'top',
+      maxNumber: 0,
+    });
+  },
+]);
+
+(function () {
+  // decorate the state, so we have access to the previous state when we inject $state in a controller
+  // Used to display helpers depending on where the navigation comes from
+  //
+  // cf http://stackoverflow.com/questions/16635381/angular-ui-router-get-previous-state
+
+  function $stateDecorator($delegate, $injector, $rootScope) {
+    function decorated$State() {
+      var $state = $delegate;
+      $state.previous = null;
+      $rootScope.$on('$stateChangeSuccess', function (ev, to, toParams, from, fromParams) {
+        $state.previous = { route: from, routeParams: fromParams };
+      });
+      return $state;
+    }
+    return decorated$State();
+  }
+
+  $stateDecorator.$inject = ['$delegate', '$injector', '$rootScope'];
+
+  angular
+    .module('app')
+    .decorator('$state', $stateDecorator);
+})();
+
+(function () {
+  // decorate ui-sref, so we add ?cid={{companyId}} to the URLs automatically,
+  // so that right click -> open in new tab always keep the current company
+  function $uiSrefDecorator($delegate, $state, $injector) {
+    function decoratedUiSref() {
+      var directive = $delegate[0];
+      var link = directive.link;
+
+      directive.compile = function () {
+        return function (scope, element, attrs) {
+          link.apply(this, arguments);
+          var ref = parseStateRef(attrs.uiSref, $state.current.name);
+          var def = { state: ref.state, href: null, params: null };
+
+          if (ref.paramExpr) {
+            scope.$watch(ref.paramExpr, function (val) { if (val !== def.params) useCompanyId(); }, true);
+            def.params = angular.copy(scope.$eval(ref.paramExpr));
+          }
+          useCompanyId();
+
+          function useCompanyId() {
+            if ($injector.has('User') && $injector.get('User')) {
+              var newHref = attrs.href;
+              var pos = newHref.indexOf('#!');
+              var companyId = parseInt($injector.get('User').companyId, 10);
+              var newCompanyId = findCompanyIdFromScope(scope);
+              if (newCompanyId !== null && newCompanyId !== companyId) {
+                if (!scope.$uiSrefNoNewTab) {
+                  attrs.$set('target', '_blank');
+                }
+                companyId = newCompanyId;
+              }
+              if (typeof companyId === 'number' && !isNaN(companyId)) {
+                newHref = newHref.slice(0, pos) + '?cid=' + companyId + newHref.slice(pos);
+              }
+              attrs.$set('href', newHref);
+            }
+          }
+
+          function findCompanyIdFromScope($scope) {
+            if (!$scope) {
+              return null;
+            }
+            if ($scope.company) {
+              return $scope.company.id;
+            }
+            if ($scope.companyId) {
+              return $scope.companyId;
+            }
+            return findCompanyIdFromScope($scope.$parent);
+          }
+        };
+      };
+      return $delegate;
+
+      // parseStateRef copied from angular-ui-router.js
+      function parseStateRef(ref, current) {
+        var preparsed = ref.match(/^\s*({[^}]*})\s*$/);
+        var parsed;
+        var newRef = ref;
+        if (preparsed) {
+          newRef = current + '(' + preparsed[1] + ')';
+        }
+        parsed = newRef.replace(/\n/g, ' ').match(/^([^(]+?)\s*(\((.*)\))?$/);
+        if (!parsed || parsed.length !== 4) throw new Error("Invalid state ref '" + newRef + "'");
+        return { state: parsed[1], paramExpr: parsed[3] || null };
+      }
+    }
+    return decoratedUiSref();
+  }
+
+  $uiSrefDecorator.$inject = ['$delegate', '$state', '$injector'];
+
+  angular
+    .module('app')
+    .decorator('uiSrefDirective', $uiSrefDecorator);
+})();
+
+
+app.run([  '$rootScope', '$location', 'Auth', '$filter', '$templateCache', 'ngToast', 'Language', 'PageTitle', '$state', 'ngRights', 'User', '$cacheFactory',
+  function ($rootScope,   $location,   Auth,   $filter,   $templateCache,   ngToast,   Language,   PageTitle,   $state,   ngRights,   User,   $cacheFactory) {
+    superAnalytics.page('app', {});
+    var preferredLanguage = Language.locale();
+    Language.currentPlatform = 'app';
+    if (preferredLanguage) {
+      Language.set(preferredLanguage);
+    }
+    window.Language = Language;
+    window.Auth = Auth;
+
+    $rootScope.demo = {
+      runs: false,
+      start: function () {
+        $cacheFactory.get('$http').removeAll();
+        User.companyId = 0;
+        this.runs = true;
+        if (location.search !== '?go-to-demo') {
+          location.replace('/app/?go-to-demo' + location.hash);
+        }
+      },
+      stop: function () {
+        $cacheFactory.get('$http').removeAll();
+        this.runs = false;
+        if (location.search.length) {
+          location.replace('/app/' + location.hash);
+        }
+      },
+      isRunning: function () {
+        return this.runs;
+      },
+    };
+
+    ngRights.subjectGenerator = function () { return User.generateSubject(); };
+    ngRights.addRules({
+      companies: {
+        list: function (subject) { return subject.admin === true; },
+        create: function (subject) { return subject.admin === true; },
+      },
+      globalAdmin: function (subject) { return subject.admin === true; },
+      dashboard: {
+        view: function (subject) { return subject.userType === 'Admin' || subject.userType === 'Manager'; },
+      },
+      campaigns: {
+        list: function (subject, company) { return company.hasCampaigns && (subject.userType === 'Admin' || (subject.userType === 'Manager' && subject.campaignsRightsRoles.length > 0)); },
+      },
+      surveys: {
+        list: function (subject, company) { return subject.userType === 'Admin' && company.hasSurveys; },
+      },
+      reporting: {
+        list: function (subject, company) { return subject.userType === 'Admin' && company.hasSurveys; },
+      },
+      superlikes: function (subject, company) { return subject.userType === 'Admin' && company.hasSuperlikes; },
+      superLikeMenu: function (subject, company) { return subject.userType === 'Admin' && company.hasSuperLikeMenu; },
+      teams: {
+        list: function (subject) { return subject.userType === 'Admin'; },
+      },
+      billing: function (subject) { return subject.userType === 'Admin'; },
+      settings: {
+        theme: function (subject) { return  subject.userType === 'Admin'; },
+        survey: function (subject, company) { return  subject.userType === 'Admin' && company.hasSurveys; },
+        userSettings: false,
+      },
+    });
+
+    FastClick.attach(document.body); // run FastClick to suppress the 300ms delay in browser
+/* jshint ignore:start */
+    $templateCache.put('bootstrap/match.tpl.html', '<div class=\"ui-select-match\" ng-hide=\"$select.open\" ng-disabled=\"$select.disabled\" ng-class=\"{\'btn-default-focus\':$select.focus}\"><span tabindex=\"-1\" class=\"form-control ui-select-toggle\" aria-label=\"{{ $select.baseTitle }} activate\" ng-disabled=\"$select.disabled\" ng-click=\"$select.activate()\" style=\"outline: 0;\"><span ng-show=\"$select.isEmpty()\" class=\"ui-select-placeholder text-muted\">{{$select.placeholder}}</span> <span ng-hide=\"$select.isEmpty()\" class=\"ui-select-match-text pull-left\" ng-class=\"{\'ui-select-allow-clear\': $select.allowClear && !$select.isEmpty()}\" ng-transclude=\"\"></span> <i class=\"caret pull-right\" ng-click=\"$select.toggle($event)\"></i> <a ng-show=\"$select.allowClear && !$select.isEmpty()\" aria-label=\"{{ $select.baseTitle }} clear\" style=\"margin-right: 10px\" ng-click=\"$select.clear($event)\" class=\"btn btn-xs btn-link pull-right\"><i class=\"glyphicon glyphicon-remove\" aria-hidden=\"true\"></i></a></span></div>');
+/* jshint ignore:end */
+
+    $rootScope.ORIGIN = window.ORIGIN;
+    $rootScope.STATIC_ORIGIN = window.STATIC_ORIGIN;
+    $rootScope.CACHEBUSTING_VERSION = window.CACHEBUSTING_VERSION;
+
+    $rootScope.Language = Language;
+    $rootScope.PageTitle = PageTitle;
+    $rootScope.inIframe = (window.top !== window);
+    $rootScope.isOpera = !!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0;
+    $rootScope.isFirefox = typeof InstallTrigger !== 'undefined';
+    $rootScope.isChrome = !!window.chrome && !$rootScope.isOpera;
+    $rootScope.isIE = !!window.document.documentMode || window.navigator.userAgent.indexOf('MSIE ') > 0;
+
+    $rootScope.getSurveyUrl = function (slug, isPreview, cid) {
+      var url = '/s/' + (typeof cid === 'number' ? ('?cid=' + cid) : '');
+      url += '#!/' + (isPreview ? 'preview/' : 's/') + slug;
+      return url;
+    };
+
+    $rootScope.reload = function () {
+      location.reload();
+    };
+
+    $rootScope.$on('$stateChangeStart', function () {
+      $rootScope.loading = {
+        text: 'a_loadingData',
+      };
+    });
+    $rootScope.$on('$stateChangeSuccess', function (event, newState) {
+      if ($state.current.name === 'app') {
+        $state.go('app.dashboard');
+        return;
+      }
+      $rootScope.loading = null;
+      var cleanParams = function (params) {
+        delete params.token;
+        delete params.tk;
+        delete params.email;
+        delete params.bt;
+        delete params.firstName;
+        delete params.lastName;
+        delete params.name;
+        return params;
+      };
+      window.onbeforeunload = function () {
+        superAnalytics.page($state.current.name, cleanParams(angular.copy($state.params)));
+        Auth.onbeforeunload();
+      };
+      try {
+        PageTitle.setTitle('pt_' + newState.name);
+      } catch (e) {
+        window.lastError = e;
+        if (window.trackJs) {
+          window.trackJs.track(e);
+        }
+      }
+      try {
+        ga('set', 'page', '/app' + $location.path());
+        ga('send', 'pageview', {
+          location: $location.$$absUrl,
+        });
+      } catch (e) {
+        window.lastError = e;
+      }
+      try { hj('vpv', '/app' + $location.path()); } catch (e) {
+        window.lastError = e;
+      }
+      setTimeout(function () {
+        try {
+          if ($state.current.name === 'reportGeneration') {
+            window.zE(function () {
+              window.zE.hide();
+            });
+          }
+        } catch (e) {
+          window.lastError = e;
+        }
+      }, 20);
+      try {
+        if ($state.previous.route.name.length > 0) { // to avoid recording something when it's the starting point
+          superAnalytics.page($state.previous.route.name, _.merge(cleanParams(angular.copy($state.previous.routeParams)), { 'companyId': parseInt(User.companyId, 10) }));
+        }
+      } catch (e) {
+        window.lastError = e;
+      }
+    });
+    $rootScope.$on('$stateChangeError', function () {
+      $rootScope.loading = null;
+    });
+  },
+]);

@@ -1,0 +1,440 @@
+(function () {
+  angular
+    .module('app.campaigns')
+    .service('CampaignsService', CampaignsService);
+
+  CampaignsService.$inject = ['CampaignsResource', 'CompanyService', 'CampaignAnalysisResource', 'Campaign', 'Hierarchy', 'User', 'ErrorReporter', 'SharingResultsConfig', 'Survey', 'Category', '$q', '$filter', '$modal'];
+
+  function CampaignsService(CampaignsResource, CompanyService, CampaignAnalysisResource, Campaign, Hierarchy, User, ErrorReporter, SharingResultsConfig, Survey, Category, $q, $filter, $modal) {
+    var service = this;
+    service.getCampaigns = getCampaigns;
+    service.getPulseCampaigns = getPulseCampaigns;
+    service.getManagerCampaigns = getManagerCampaigns;
+    service.getFavoriteCampaigns = getFavoriteCampaigns;
+    service.getAllowedHierarchies = getAllowedHierarchies;
+    service.getFilterableAttributes = getFilterableAttributes;
+    service.getUserAttributesValuesAt = getUserAttributesValuesAt;
+    service.getCampaign = getCampaign;
+    service.getCampaignDrivers = getCampaignDrivers;
+    service.loadFormerSurveys = loadFormerSurveys;
+    service.loadCampaignSurveys = loadCampaignSurveys;
+    service.loadCampaignsStatistics = loadCampaignsStatistics;
+    service.getCampaignStatistics = getCampaignStatistics;
+    service.getCampaignsStatistics = getCampaignsStatistics;
+    service.getAutomaticRightsScript = getAutomaticRightsScript;
+    service.setAutomaticRightsScript = setAutomaticRightsScript;
+    service.updateSettings = updateSettings;
+    service.stopSurveyGeneration = stopSurveyGeneration;
+    service.startSurveyGeneration = startSurveyGeneration;
+    service.runScript = runScript;
+    service.generate = generate;
+    service.regenerateRights = regenerateRights;
+    service.setTranslations = setTranslations;
+    service.editTranslations = editTranslations;
+    service.sendIntroductionEmail = sendIntroductionEmail;
+    service.sendEmail = sendEmail;
+    service.openDriverExpertise = openDriverExpertise;
+    service.addQuestionToSet = addQuestionToSet;
+    service.removeQuestionFromSet = removeQuestionFromSet;
+    service.questionUnsupportedLanguages = questionUnsupportedLanguages;
+    service.campaigns = [];
+    service.getCampaignSharingResultsConfiguration = getCampaignSharingResultsConfiguration;
+    service.saveSharingResultsConfiguration = saveSharingResultsConfiguration;
+    service.makeFavorite = makeFavorite;
+    service.deleteSurvey = deleteSurvey;
+    service.confirmAndDeleteCampaign = confirmAndDeleteCampaign;
+    var campaignsPromise = null;
+    /* ------------------ */
+
+    function getCampaigns(companyId) {
+      campaignsPromise = CampaignsResource.list({ companyId: companyId }).$promise.then(function (data) {
+        service.campaigns = Campaign.parseArray(data);
+        return service.campaigns;
+      });
+      return campaignsPromise;
+    }
+    function getPulseCampaigns(companyId) {
+      campaignsPromise = CampaignsResource.list({ companyId: companyId }).$promise.then(function (data) {
+        service.campaigns = Campaign.parseArray(data);
+        return _.filter(service.campaigns, function (campaign) {
+          return campaign.campaignType === 'pulse';
+        });
+      });
+      return campaignsPromise;
+    }
+    function getManagerCampaigns(companyId) {
+      campaignsPromise = CampaignsResource.list({ companyId: companyId }).$promise.then(function (data) {
+        service.campaigns = Campaign.parseArray(data);
+        return _.filter(service.campaigns, function (campaign) {
+          return campaign.campaignType === 'manager';
+        });
+      });
+      return campaignsPromise;
+    }
+    function getFavoriteCampaigns(companyId, maxCampaigns) {
+      // For the demo company only return the first campaign as favourite.
+      if (CompanyService.isDemo(companyId)) {
+        return service.getCampaigns(companyId)
+          .then(function (campaigns) {
+            if (campaigns.length > 0) {
+              return [campaigns[0]];
+            }
+            return campaigns;
+          });
+      }
+      return User.loadFavoriteCampaigns()
+        .then(function () {
+          var promises = [];
+          var nbCampaigns = User.favoriteCampaignsIds.length;
+          if (typeof maxCampaigns !== 'undefined' && maxCampaigns < nbCampaigns) {
+            nbCampaigns = maxCampaigns;
+          }
+
+          for (var i = 0; i < nbCampaigns; i++) {
+            if (_.get(User, 'favoriteCampaignsIds[' + i + ']', null) === null) {
+              continue;
+            }
+            promises.push(service.getCampaign(companyId, User.favoriteCampaignsIds[i]));
+          }
+          return $q.all(promises);
+        });
+    }
+    function getAllowedHierarchies(companyId, campaignId) {
+      return CampaignsResource.getAllowedHierarchies({ companyId: companyId, campaignId: campaignId })
+        .$promise
+        .then(function (hierarchies) {
+          return Hierarchy.parseArray(hierarchies);
+        });
+    }
+    function getFilterableAttributes(companyId, campaignId) {
+      return CampaignsResource.getFilterableAttributes({ companyId: companyId, campaignId: campaignId })
+        .$promise
+        .then(function (attributeKeys) {
+          return _.sortBy(attributeKeys, function (attrKey) {
+            return $filter('translateUserAttribute')(attrKey);
+          });
+        });
+    }
+    function getUserAttributesValuesAt(companyId, campaignId, atTime, hierarchyKey) {
+      return CampaignsResource.getUserAttributesValuesAt({ companyId: companyId, campaignId: campaignId, atTime: atTime, hierarchyFilterKey: hierarchyKey }).$promise;
+    }
+    function getCampaign(companyId, campaignId) {
+      var resolveAfter = campaignsPromise;
+      if (!resolveAfter) {
+        resolveAfter = getCampaigns(companyId);
+      }
+      return resolveAfter.then(function () {
+        var campaignToReturn = _.find(service.campaigns, function (campaign) { return campaign.id === parseInt(campaignId, 10); });
+        if (campaignToReturn) {
+          return campaignToReturn;
+        }
+        return $q.reject('Campaign not found');
+      });
+    }
+    function getCampaignDrivers(companyId, campaignId) {
+      return CampaignsResource.getCampaignDrivers({ companyId: companyId, campaignId: campaignId })
+        .$promise
+        .then(function (drivers) {
+          return Category.parseArray(drivers);
+        });
+    }
+    function loadCampaignSurveys(campaign) {
+      var p1 = CampaignsResource.getFormerSurveys({ companyId: campaign.companyId, campaignId: campaign.id }).$promise.then(function (data) {
+        campaign.formerSurveys = _.sortBy(Survey.parseArray(data), 'beginsAt').filter(function (survey) {
+          return moment(survey.beginsAt).isBefore(moment()) && moment(survey.endsAt).isBefore(moment());
+        }).reverse();
+        campaign.liveSurveys = _.sortBy(Survey.parseArray(data), 'beginsAt').filter(function (survey) {
+          return moment(survey.beginsAt).isBefore(moment()) && moment(survey.endsAt).isAfter(moment());
+        });
+      });
+      var p2 = CampaignsResource.getFutureSurveys({ companyId: campaign.companyId, campaignId: campaign.id }).$promise.then(function (data) {
+        campaign.futureSurveys = Survey.parseArray(data);
+      });
+      return $q.all([p1, p2]);
+    }
+    function loadFormerSurveys(campaign) {
+      return CampaignsResource.getFormerSurveys({ companyId: campaign.companyId, campaignId: campaign.id }).$promise.then(function (data) {
+        campaign.formerSurveys = _.sortBy(Survey.parseArray(data), 'beginsAt').filter(function (survey) {
+          return moment(survey.beginsAt).isBefore(moment()) && moment(survey.endsAt).isBefore(moment());
+        }).reverse();
+        campaign.liveSurveys = _.sortBy(Survey.parseArray(data), 'beginsAt').filter(function (survey) {
+          return moment(survey.beginsAt).isBefore(moment()) && moment(survey.endsAt).isAfter(moment());
+        });
+      });
+    }
+    function loadCampaignsStatistics(hierarchyKey) {
+      var deferred = $q.defer();
+      function incrementalLoad(i) {
+        if (i < service.campaigns.length) {
+          getCampaignStatistics(service.campaigns[i], hierarchyKey).finally((function (j) { incrementalLoad(j); })(i + 1));
+        } else {
+          deferred.resolve();
+        }
+      }
+      incrementalLoad(0);
+      return deferred.promise;
+    }
+
+    function getCampaignStatistics(campaign, hierarchyKey) {
+      var params = { companyId: campaign.companyId, campaignId: campaign.id };
+      if (typeof hierarchyKey !== 'undefined') {
+        params.hierarchyKey = hierarchyKey;
+      }
+      return CampaignsResource.getStatistics(params).$promise.then(function (data) {
+        if (data.nextSurvey) {
+          data.nextSurvey = Survey.parse(data.nextSurvey);
+        }
+        campaign.statistics = data;
+        return campaign;
+      });
+    }
+    function getCampaignsStatistics(campaigns, hierarchyKey) {
+      return $q.all(_.filter(
+        _.map(campaigns, function (campaign) { return typeof campaign !== 'undefined' ? getCampaignStatistics(campaign, hierarchyKey) : null; })),
+        function (campaign) { return typeof campaign !== 'undefined'; }
+      );
+    }
+    function getCampaignSharingResultsConfiguration(companyId, campaignId) {
+      return CampaignsResource.getCampaignSharingResultsConfiguration({ companyId: companyId, campaignId: campaignId }).$promise.then(function (data) {
+        return new SharingResultsConfig(data);
+      }, function () {
+        // does not exist yet, a save will create it
+        return new SharingResultsConfig({ id: null, companyId: companyId, campaignId: campaignId });
+      });
+    }
+    function saveSharingResultsConfiguration(config) {
+      var saver = null;
+      if (!config.id) {
+        saver = CampaignsResource.storeSharingResultsConfig;
+      } else {
+        saver = CampaignsResource.updateSharingResultsConfig;
+      }
+      var data = angular.copy(config);
+      data.sharingResultsConfigId = config.id;
+      return saver(data).$promise.then(function (newConfig) {
+        return config.apply(newConfig);
+      });
+    }
+    function updateSettings(campaign, startDate, surveyFrequency, surveyDuration, surveyEmails, noDates) {
+      return CampaignsResource.updateSettings({
+        companyId: campaign.companyId,
+        campaignId: campaign.id,
+        beginsAt: startDate ? startDate.format('YYYY-MM-DD HH:00:00') : null,
+        surveyFrequency: surveyFrequency,
+        surveyDuration: surveyDuration,
+        surveyEmails: surveyEmails,
+        noDates: noDates,
+      }).$promise.then(function (result) {
+        campaign.apply(result.campaign);
+        return result;
+      });
+    }
+    function stopSurveyGeneration(campaign) {
+      return CampaignsResource.stopSurveyGeneration({
+        companyId: campaign.companyId,
+        campaignId: campaign.id,
+      }).$promise.then(function () {
+        campaign.continueGeneration = false;
+        superAnalytics.track('SettingsModified', {
+          name: 'Stopped survey generation in a campaign',
+          product: 'SuperFeedback',
+          companyId: campaign.companyId,
+          campaignId: campaign.id,
+        });
+        return campaign;
+      });
+    }
+    function startSurveyGeneration(campaign) {
+      return CampaignsResource.startSurveyGeneration({
+        companyId: campaign.companyId,
+        campaignId: campaign.id,
+      }).$promise.then(function () {
+        campaign.continueGeneration = true;
+        superAnalytics.track('SettingsModified', {
+          name: 'Started survey generation in a campaign',
+          product: 'SuperFeedback',
+          companyId: campaign.companyId,
+          campaignId: campaign.id,
+        });
+        return campaign;
+      });
+    }
+    function runScript(companyId, campaignId, code) {
+      return CampaignsResource.runScript({
+        companyId: companyId,
+        campaignId: campaignId,
+        code: code,
+      }).$promise;
+    }
+    function generate(companyId, campaignId) {
+      return CampaignsResource.generate({
+        companyId: companyId,
+        campaignId: campaignId,
+      }).$promise;
+    }
+    function regenerateRights(companyId, campaignId) {
+      return CampaignsResource.regenerateRights({
+        companyId: companyId,
+        campaignId: campaignId,
+      }).$promise;
+    }
+    function getAutomaticRightsScript(companyId, campaignId) {
+      return CampaignsResource.getAutomaticRightsScript({
+        companyId: companyId,
+        campaignId: campaignId,
+      }).$promise;
+    }
+    function setAutomaticRightsScript(companyId, campaignId, jsonConfiguration) {
+      return CampaignsResource.setAutomaticRightsScript(_.merge({
+        companyId: companyId,
+        campaignId: campaignId,
+      }, jsonConfiguration)).$promise;
+    }
+    function setTranslations(campaign, translations) {
+      return CampaignsResource.update({
+        companyId: campaign.companyId,
+        campaignId: campaign.id,
+        translations: translations,
+      }).$promise.then(function (updatedCampaign) {
+        return campaign.apply(updatedCampaign);
+      });
+    }
+    function sendIntroductionEmail(campaign, data) {
+      var actualData = angular.copy(data);
+      actualData.companyId = campaign.companyId;
+      actualData.campaignId = campaign.id;
+      return CampaignsResource.sendIntroductionEmail(actualData).$promise;
+    }
+    function sendEmail(campaign, data) {
+      var actualData = angular.copy(data);
+      actualData.companyId = campaign.companyId;
+      actualData.campaignId = campaign.id;
+      return CampaignsResource.sendEmail(actualData).$promise;
+    }
+    function editTranslations(company, campaign) {
+      var modalOptions = {
+        title: 'c_editTranslationsTitle',
+        body: 'c_editTranslations',
+        translations: campaign.translations,
+        languages: company.languages,
+        fields: ['title', 'description'],
+        fieldsTranslations: { title: 'c_title', description: 'c_description' },
+        cancelText: 'cancel',
+        confirmText: 'save',
+        confirmCallback: function (newTranslations) {
+          superAnalytics.track('CampaignFeatures', {
+            name: 'CampaignEdition',
+            action: 'Save campaign title/description',
+            companyId: campaign.companyId,
+            campaignId: campaign.id,
+          });
+          return setTranslations(campaign, newTranslations);
+        },
+      };
+
+      superAnalytics.track('CampaignFeatures', {
+        name: 'CampaignEdition',
+        action: 'Click on the edit icon',
+        companyId: campaign.companyId,
+        campaignId: campaign.id,
+      });
+
+      var modal = $modal.open({
+        templateUrl: '/app/shared/elements/translationsEditionModal.html',
+        controller: 'shared.elements.TranslationsEditionModalController',
+        controllerAs: 'temCtrl',
+        windowClass: 'v2',
+        size: 'md',
+        resolve: {
+          options: modalOptions,
+        },
+      });
+      return modal.result;
+    }
+
+    function openDriverExpertise(driver) {
+      var modal = $modal.open({
+        templateUrl: '/app/app/campaigns/driverModal.html',
+        controllerAs: 'dmCtrl',
+        controller: ['$modalInstance', function ($modalInstance) {
+          var vm = this;
+          vm.driver = driver;
+          vm.close = function () { $modalInstance.dismiss(); };
+        }],
+        windowClass: 'v2',
+        size: 'lg',
+      });
+      return modal.result;
+    }
+
+    function addQuestionToSet(companyId, campaignId, questionModelId) {
+      return CampaignsResource.addQuestionToSet({ companyId: companyId, campaignId: campaignId, questionModelId: questionModelId }).$promise;
+    }
+
+    function removeQuestionFromSet(companyId, campaignId, questionModelId) {
+      return CampaignsResource.removeQuestionFromSet({ companyId: companyId, campaignId: campaignId, questionModelId: questionModelId }).$promise;
+    }
+
+    function questionUnsupportedLanguages(campaign, question) {
+      if (!campaign || !campaign.statistics || !question || !question.translations) {
+        return [];
+      }
+      var usedLanguages = campaign.statistics.languagesUsed;
+      var questionLanguages = Object.keys(question.translations);
+      return _.difference(usedLanguages, questionLanguages);
+    }
+
+    function makeFavorite(companyId, campaignId, favorite) {
+      return CampaignsResource.makeFavorite({ companyId: companyId, campaignId: campaignId, favorite: favorite }).$promise.then(function () {
+        return User.loadFavoriteCampaigns();
+      });
+    }
+
+    function deleteSurvey(companyId, campaignId, surveyId) {
+      return CampaignsResource.deleteSurvey({ companyId: companyId, campaignId: campaignId, surveyId: surveyId }).$promise.then(function (campaign) {
+        return Campaign.parse(campaign);
+      });
+    }
+
+    function deleteCampaign(companyId, campaignId) {
+      return CampaignsResource.deleteCampaign({ companyId: companyId, campaignId: campaignId }).$promise;
+    }
+
+    function confirmAndDeleteCampaign(campaign) {
+      var modalOptions = {
+        title: $filter('translate')('c_deleteCampaignConfirmTitle'),
+        body:  $filter('bind')($filter('translate')('c_deleteCampaignConfirmText'), campaign.getTitle()),
+        cancelText: 'no',
+        confirmText: 'yes',
+      };
+
+      var trackAction = function (action) {
+        superAnalytics.track('CampaignFeatures', {
+          name: 'CampaignEdition',
+          action: action,
+          companyId: campaign.companyId,
+          campaignId: campaign.id,
+        });
+      };
+
+      trackAction('Click on the delete icon');
+
+      var modal = $modal.open({
+        templateUrl: '/app/shared/elements/confirmationModal.html',
+        controller: 'shared.elements.ConfirmationModalController',
+        controllerAs: 'cmCtrl',
+        windowClass: 'v2',
+        size: 'md',
+        resolve: {
+          options: modalOptions,
+        },
+      });
+      return modal.result.then(function () {
+        trackAction('Confirm campaign delete');
+        return deleteCampaign(campaign.companyId, campaign.id).then(function () {
+          trackAction('Campaign successfully deleted');
+        });
+      });
+    }
+  }
+})();

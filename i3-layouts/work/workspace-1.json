@@ -1,0 +1,23 @@
+// vim:ts=4:sw=4:et
+{
+    "border": "pixel",
+    "current_border_width": 1,
+    "floating": "auto_off",
+    "geometry": {
+       "height": 1042,
+       "width": 1914,
+       "x": 1918,
+       "y": 10
+    },
+    "name": "phpstorm",
+    "percent": 1,
+    "swallows": [
+       {
+       "class": "^jetbrains-phpstorm$"
+       // "instance": "^sun\\-awt\\-X11\\-XFramePeer$",
+       // "title": "^main\\-app\\ \\[\\~\\/workspace\\/projects\\/main\\-app\\]\\ \\-\\ \\.\\.\\.\\/public\\/angular\\/src\\/app\\/teams\\/user\\-import\\/steps\\/excel\\-upload\\/step\\-excel\\-upload\\.component\\.html\\ \\[pulse\\]\\ \\-\\ PhpStorm$"
+       }
+    ],
+    "type": "con"
+}
+

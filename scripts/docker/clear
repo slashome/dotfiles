@@ -1,0 +1,9 @@
+#!/bin/bash
+#Clear docker container and images
+echo "Delete containers"
+docker rm -fv $(docker ps -a -q)
+
+echo "Delete images"
+docker rmi -f $(docker images -q)
+
+docker volume rm $(docker volume ls -qf dangling=true)

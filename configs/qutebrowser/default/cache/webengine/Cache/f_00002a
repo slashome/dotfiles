@@ -1,0 +1,599 @@
+(function () {
+  angular
+    .module('app.superscore')
+    .service('SuperscoreService', SuperscoreService);
+
+  SuperscoreService.$inject = ['SuperscoreGlobalAlert', 'SuperscoreFilteredAlert', 'SuperscorePeriod', 'SuperscoreAnalysisResource', 'UserFactory', 'Hierarchy', 'SuperscoreResource', 'SuperscoreEmailModelResource', 'ResourceResolver', '$q', 'CompanyResource', '$filter', 'shared.configuration.Theme', '$cacheFactory'];
+
+  function SuperscoreService(SuperscoreGlobalAlert, SuperscoreFilteredAlert, SuperscorePeriod, SuperscoreAnalysisResource, UserFactory, Hierarchy, SuperscoreResource, SuperscoreEmailModelResource, ResourceResolver, $q, CompanyResource, $filter, Theme, $cacheFactory) {
+    var defaultDimension = null;
+    var defaultDimensionValues = null;
+    var selectedHierarchyFilterKey = null;
+    this.getSuperscoreHierarchies     = getSuperscoreHierarchies;
+    this.getDefaultDimension          = getDefaultDimension;
+    this.setDefaultDimension          = setDefaultDimension;
+    this.getDefaultDimensionValues    = getDefaultDimensionValues;
+    this.setDefaultDimensionValues    = setDefaultDimensionValues;
+    this.getConfiguration             = getConfiguration;
+    this.getAutomaticRightsScript     = getAutomaticRightsScript;
+    this.getUserRights                = getUserRights;
+    this.updateConfiguration          = updateConfiguration;
+    this.enableComments               = enableComments;
+    this.disableComments              = disableComments;
+    this.removeEmailModel             = removeEmailModel;
+    this.createEmailModel             = createEmailModel;
+    this.refreshAllAutomaticRights    = refreshAllAutomaticRights;
+    this.refreshAutomaticRights       = refreshAutomaticRights;
+    this.setAutomaticRightsScript     = setAutomaticRightsScript;
+    this.getNextPeriod                = getNextPeriod;
+    this.getCurrentPeriod             = getCurrentPeriod;
+    this.getStartedPeriods            = getStartedPeriods;
+    this.getStartedPeriodsWithHierarchy = getStartedPeriodsWithHierarchy;
+    this.getLastPeriodWithoutError    = getLastPeriodWithoutError;
+    this.getFinishedPeriods           = getFinishedPeriods;
+    this.getPeriodMapResults          = getPeriodMapResults;
+    this.getPeriodMapResultsEvolution = getPeriodMapResultsEvolution;
+    this.getPeriodComments            = getPeriodComments;
+    this.getComments                  = getComments;
+    this.getCompanyUserAttributeValuesAt = getCompanyUserAttributeValuesAt;
+    this.parseForEvolutionGraph       = parseForEvolutionGraph;
+    this.addPeriodsToGraph            = addPeriodsToGraph;
+    this.getPeriod                    = getPeriod;
+    this.getPeriodFilteredAlerts      = getPeriodFilteredAlerts;
+    this.getPeriodGlobalAlerts        = getPeriodGlobalAlerts;
+    this.getPeriodHierarchyAnswerStatistics = getPeriodHierarchyAnswerStatistics;
+    this.setPeriodsAnswerRate         = setPeriodsAnswerRate;
+    // filtering (hierarchy, dates TODO) functions
+    var filterObservers = [];
+    this.setHierarchyFilter           = setHierarchyFilter;
+    this.getHierarchyFilter           = getHierarchyFilter;
+    this.registerFilterObserver       = registerFilterObserver;
+    this.unregisterFilterObserver     = unregisterFilterObserver;
+    this.notifyFilterObservers        = notifyFilterObservers;
+
+    /* ------------------ */
+    function getSuperscoreHierarchies(companyId) {
+      return SuperscoreResource.allowedHierarchies({ companyId: companyId }).$promise.then(function (hierarchies) {
+        return Hierarchy.parseArray(hierarchies);
+      });
+    }
+    function getDefaultDimension() {
+      return defaultDimension;
+    }
+    function setDefaultDimension(dimension) {
+      defaultDimension = dimension;
+    }
+    function getDefaultDimensionValues() {
+      return defaultDimensionValues;
+    }
+    function setDefaultDimensionValues(dimensionValues) {
+      defaultDimensionValues = dimensionValues;
+    }
+    function getConfiguration(companyId) {
+      return SuperscoreResource.getConfigs({ companyId: companyId }).$promise.then(function (data) {
+        return data[0];
+      });
+    }
+    function getAutomaticRightsScript(companyId, config) {
+      return SuperscoreResource.getAutomaticRightsScript({ companyId: companyId, configId: config.id }).$promise;
+    }
+    function getUserRights(companyId, config) {
+      return SuperscoreResource.getUserRights({ companyId: companyId, configId: config.id }).$promise.then(function (users) {
+        return UserFactory.parseArray(users);
+      });
+    }
+    function updateConfiguration(companyId, config) {
+      superAnalytics.track('SettingsModified', {
+        name: 'New configuration saved',
+        product: 'SuperScore',
+        companyId: companyId,
+      });
+      var usedConfig = angular.copy(config);
+      var callToMake = null;
+      if (config.id) {
+        usedConfig.configId = config.id;
+        callToMake = SuperscoreResource.update;
+      } else {
+        callToMake = SuperscoreResource.create;
+      }
+      usedConfig.companyId = companyId;
+      usedConfig.nextPeriodBeginsAt = usedConfig.nextPeriodBeginsAt.format('YYYY-MM-DD HH:mm:ss');
+      return callToMake(usedConfig).$promise.then(function (results) {
+        var $httpDefaultCache = $cacheFactory.get('$http');
+        $httpDefaultCache.remove('/api/company/' + companyId + '/analysis/nps/periods/next?hierarchyFilterKey=' + selectedHierarchyFilterKey);
+        return results;
+      });
+    }
+    function enableComments(company, config) {
+      superAnalytics.track('SettingsModified', {
+        name: 'Change comments config',
+        action: 'enable',
+        product: 'SuperScore',
+        companyId: company.id,
+      });
+      return SuperscoreResource.enableComments({ companyId: company.id, configId: config.id }).$promise.then(function (updatedCompany) {
+        company.apply(updatedCompany);
+        return company;
+      });
+    }
+    function disableComments(company, config) {
+      superAnalytics.track('SettingsModified', {
+        name: 'Change comments config',
+        action: 'disable',
+        product: 'SuperScore',
+        companyId: company.id,
+      });
+      return SuperscoreResource.disableComments({ companyId: company.id, configId: config.id }).$promise.then(function (updatedCompany) {
+        company.apply(updatedCompany);
+        return company;
+      });
+    }
+    function removeEmailModel(companyId, config, npsEmailModelId) {
+      superAnalytics.track('SettingsModified', {
+        name: 'Remove email model',
+        product: 'SuperScore',
+        companyId: companyId,
+      });
+      return SuperscoreEmailModelResource.destroy({ companyId: companyId, configId: config.id, emailModelId: npsEmailModelId }).$promise.then(function () {
+        var idx = _.findIndex(config.emailModels, function (model) { return model.id === npsEmailModelId; });
+        config.emailModels.splice(idx, 1);
+        return config;
+      });
+    }
+    function createEmailModel(companyId, config, newEmail) {
+      superAnalytics.track('SettingsModified', {
+        name: 'Create new email model',
+        product: 'SuperScore',
+        companyId: companyId,
+      });
+      newEmail.companyId = companyId;
+      newEmail.configId = config.id;
+      return SuperscoreEmailModelResource.create(newEmail).$promise.then(function (emailModel) {
+        if (!config.emailModels) {
+          config.emailModels = [];
+        }
+        config.emailModels.push(emailModel);
+        return config;
+      });
+    }
+    function refreshAllAutomaticRights(companyId) {
+      return SuperscoreResource.refreshAllAutomaticRights({ companyId: companyId }).$promise;
+    }
+    function refreshAutomaticRights(companyId, config) {
+      return SuperscoreResource.refreshAutomaticRights({ companyId: companyId, configId: config.id }).$promise;
+    }
+    function setAutomaticRightsScript(companyId, config, jsonConfig) {
+      return SuperscoreResource.setAutomaticRights(_.merge({ companyId: companyId, configId: config.id }, jsonConfig)).$promise;
+    }
+    function getNextPeriod(companyId) {
+      var promise = new ResourceResolver(SuperscoreAnalysisResource.getNextPeriod({ companyId: companyId, hierarchyFilterKey: selectedHierarchyFilterKey }).$promise, SuperscorePeriod.parse);
+      return promise;
+    }
+    function getCurrentPeriod(companyId) {
+      var promise = new ResourceResolver(SuperscoreAnalysisResource.getCurrentPeriod({ companyId: companyId, hierarchyFilterKey: selectedHierarchyFilterKey }).$promise, SuperscorePeriod.parse);
+      return promise;
+    }
+    function getStartedPeriods(companyId) {
+      var promise = new ResourceResolver(SuperscoreAnalysisResource.getStartedPeriods({ companyId: companyId, hierarchyFilterKey: selectedHierarchyFilterKey }).$promise, SuperscorePeriod.parseArray);
+      return promise;
+    }
+    function getStartedPeriodsWithHierarchy(companyId, hierarchyKey) {
+      var promise = new ResourceResolver(SuperscoreAnalysisResource.getStartedPeriods({ companyId: companyId, hierarchyFilterKey: hierarchyKey }).$promise, SuperscorePeriod.parseArray);
+      return promise;
+    }
+
+    function getLastPeriodWithoutError(periods) {
+      var i = periods.length - 1;
+      while (i >= 0 && typeof periods[i].error !== 'undefined') {
+        i--;
+      }
+      if (i === 0 && typeof periods[0].error !== 'undefined') {
+        i = periods.length - 1;
+      }
+      return periods[i];
+    }
+    function getFinishedPeriods(companyId) {
+      var promise = new ResourceResolver(SuperscoreAnalysisResource.getFinishedPeriods({ companyId: companyId, hierarchyFilterKey: selectedHierarchyFilterKey }).$promise, SuperscorePeriod.parseArray);
+      return promise;
+    }
+    function getPeriod(companyId, periodId) {
+      var promise = new ResourceResolver(SuperscoreAnalysisResource.getPeriod({ companyId: companyId, periodId: periodId, hierarchyFilterKey: selectedHierarchyFilterKey }).$promise, SuperscorePeriod.parse);
+      return promise;
+    }
+    function getPeriodHierarchyAnswerStatistics(companyId, periodId) {
+      var promise = SuperscoreAnalysisResource.getPeriodHierarchyAnswerStatistics({ companyId: companyId, periodId: periodId, hierarchyFilterKey: selectedHierarchyFilterKey }).$promise;
+      return promise.then(function (data) {
+        return _.map(data, function (dataElement) {
+          return {
+            key:         dataElement.k,
+            selfPeopleCount: dataElement.sp,
+            selfAnswerCount: dataElement.sa,
+            peopleCount: dataElement.p,
+            answerCount: dataElement.a,
+            nps:         dataElement.nps,
+          };
+        });
+      });
+    }
+    function getPeriodFilteredAlerts(companyId, periodId) {
+      var promise = new ResourceResolver(SuperscoreAnalysisResource.getPeriodFilteredAlerts({ companyId: companyId, periodId: periodId, hierarchyFilterKey: selectedHierarchyFilterKey }).$promise, SuperscoreFilteredAlert.parseArray);
+      return promise;
+    }
+    function getPeriodGlobalAlerts(companyId, periodId) {
+      var promise = new ResourceResolver(SuperscoreAnalysisResource.getPeriodGlobalAlerts({ companyId: companyId, periodId: periodId, hierarchyFilterKey: selectedHierarchyFilterKey }).$promise, SuperscoreGlobalAlert.parseArray);
+      return promise;
+    }
+    function getPeriodMapResults(companyId, periodId, mapKey) {
+      return SuperscoreAnalysisResource
+        .getPeriodMapResults({ companyId: companyId, periodId: periodId, mapKey: mapKey, hierarchyFilterKey: selectedHierarchyFilterKey })
+        .$promise
+        .then(function (mapResults) {
+          return _.map(mapResults, function (mapLine) {
+            if (!mapLine.error) {
+              mapLine.detractors = mapLine.histogram[0] + mapLine.histogram[1] + mapLine.histogram[2] + mapLine.histogram[3] + mapLine.histogram[4] + mapLine.histogram[5] + mapLine.histogram[6];
+              mapLine.neutrals = mapLine.histogram[7] + mapLine.histogram[8];
+              mapLine.promoters = mapLine.histogram[9] + mapLine.histogram[10];
+
+              mapLine.detractorsPercentage = 100 * mapLine.detractors / mapLine.answerCount;
+              mapLine.neutralsPercentage   = 100 * mapLine.neutrals   / mapLine.answerCount;
+              mapLine.promotersPercentage  = 100 * mapLine.promoters  / mapLine.answerCount;
+
+              mapLine.superscore = mapLine.promotersPercentage - mapLine.detractorsPercentage;
+            }
+            return mapLine;
+          });
+        });
+    }
+    function getPeriodMapResultsEvolution(companyId, fromPeriodId, toPeriodId, mapKey) {
+      var fromPeriod = SuperscoreAnalysisResource
+        .getPeriodMapResults({ companyId: companyId, periodId: fromPeriodId, mapKey: mapKey, hierarchyFilterKey: selectedHierarchyFilterKey })
+        .$promise
+        .then(function (mapResults) {
+          return _.map(mapResults, function (mapLine) {
+            if (!mapLine.error) {
+              mapLine.detractors = mapLine.histogram[0] + mapLine.histogram[1] + mapLine.histogram[2] + mapLine.histogram[3] + mapLine.histogram[4] + mapLine.histogram[5] + mapLine.histogram[6];
+              mapLine.neutrals = mapLine.histogram[7] + mapLine.histogram[8];
+              mapLine.promoters = mapLine.histogram[9] + mapLine.histogram[10];
+
+              mapLine.detractorsPercentage = 100 * mapLine.detractors / mapLine.answerCount;
+              mapLine.neutralsPercentage   = 100 * mapLine.neutrals   / mapLine.answerCount;
+              mapLine.promotersPercentage  = 100 * mapLine.promoters  / mapLine.answerCount;
+
+              mapLine.superscore = mapLine.promotersPercentage - mapLine.detractorsPercentage;
+            }
+            return mapLine;
+          });
+        });
+      var toPeriod = SuperscoreAnalysisResource
+        .getPeriodMapResults({ companyId: companyId, periodId: toPeriodId, mapKey: mapKey, hierarchyFilterKey: selectedHierarchyFilterKey })
+        .$promise
+        .then(function (mapResults) {
+          return _.map(mapResults, function (mapLine) {
+            if (!mapLine.error) {
+              mapLine.detractors = mapLine.histogram[0] + mapLine.histogram[1] + mapLine.histogram[2] + mapLine.histogram[3] + mapLine.histogram[4] + mapLine.histogram[5] + mapLine.histogram[6];
+              mapLine.neutrals = mapLine.histogram[7] + mapLine.histogram[8];
+              mapLine.promoters = mapLine.histogram[9] + mapLine.histogram[10];
+
+              mapLine.detractorsPercentage = 100 * mapLine.detractors / mapLine.answerCount;
+              mapLine.neutralsPercentage   = 100 * mapLine.neutrals   / mapLine.answerCount;
+              mapLine.promotersPercentage  = 100 * mapLine.promoters  / mapLine.answerCount;
+
+              mapLine.superscore = mapLine.promotersPercentage - mapLine.detractorsPercentage;
+            }
+            return mapLine;
+          });
+        });
+      var deferred = $q.defer();
+      toPeriod.then(function (toResults) {
+        fromPeriod.then(function (fromResults) {
+          deferred.resolve(_.map(toResults, function (mapLine) {
+            var fromLine = _.find(fromResults, function (resultLine) {
+              return resultLine.value === mapLine.value;
+            });
+            if (fromLine) {
+              mapLine.evolution = mapLine.superscore - fromLine.superscore;
+            }
+            return mapLine;
+          }));
+        }, function (error) {
+          console.warn(error);
+          deferred.resolve(toResults);
+        });
+      }, function (error) {
+        deferred.reject(error);
+      });
+      return deferred.promise;
+    }
+    function getPeriodComments(companyId, periodId) {
+      return SuperscoreAnalysisResource
+        .getPeriodComments({ companyId: companyId, periodId: periodId, hierarchyFilterKey: selectedHierarchyFilterKey })
+        .$promise
+        .then(function (mapResults) {
+          return _.map(mapResults, function (mr) { // unserialize as fast as possible
+            return {
+              answer: mr.a,
+              comment: mr.ac,
+            };
+          });
+        });
+    }
+    function getComments(companyId) {
+      return SuperscoreAnalysisResource
+        .getComments({ companyId: companyId, hierarchyFilterKey: selectedHierarchyFilterKey })
+        .$promise
+        .then(function (mapResults) {
+          return _.map(mapResults, function (mr) { // unserialize as fast as possible
+            return {
+              answer: mr.a,
+              comment: mr.ac,
+              npsPeriodId: mr.nid,
+            };
+          });
+        });
+    }
+    function getCompanyUserAttributeValuesAt(companyId, atTime) {
+      return SuperscoreResource
+        .userAttributesValues({ companyId: companyId, atTime: atTime, hierarchyFilterKey: selectedHierarchyFilterKey })
+        .$promise
+        .then(function (data) {
+          var companyAttributesValues = {};
+          _.forEach(data, function (values, attributeKey) {
+            if (!angular.isArray(values)) {
+              return;
+            }
+            if (!companyAttributesValues[attributeKey]) {
+              companyAttributesValues[attributeKey] = [];
+            }
+            _.forEach(values, function (value) {
+              companyAttributesValues[attributeKey].push(value);
+            });
+          });
+          return companyAttributesValues;
+        });
+    }
+
+    function setPeriodsAnswerRate(periods) {
+      return _.map(periods, function (period) {
+        period.answersRate = Math.round(period.answerCount / period.sentToCount * 100);
+        return period;
+      });
+    }
+
+    // @deprecated try to use evolutionGraphFactory.service intead.
+    function parseForEvolutionGraph(company, periods) {
+      // var filteredPeriods = _.filter(periods, function (period) { return period.sentToCount > 0; });
+      return {
+        data: parseResults(company, periods),
+        options: getOptions(periods),
+        periods: periods,
+      };
+    }
+    // @deprecated try to use evolutionGraphFactory.service intead.
+    function addPeriodsToGraph(graph, periodsWithMapResults, selectedDimension) {
+      return {
+        data: addResultsToGraph(graph.data, periodsWithMapResults, selectedDimension),
+        options: getOptions(graph.periods, selectedDimension),
+        periods: graph.periods,
+      };
+    }
+    // @deprecated try to use evolutionGraphFactory.service intead.
+    function parseResults(company, periods) {
+      var series = _.map(periods, function (period) {
+        return {
+          x: moment(period.beginsAt),
+          y: !period.error ? $filter('round')(period.superscore) : null,
+          period: period,
+        };
+      });
+
+      if (periods.length > 0) {
+        series.splice(0, 0, { x: moment(periods[0].beginsAt).add(-1, 'week'), y: null, period: null });
+        series.push({ x: moment(periods[periods.length - 1].beginsAt).add(1, 'week'), y: null, period: null });
+      }
+
+      return [{
+        values: series,
+        key: company.name,
+        color: Theme.getGraphCurvesColor(0),
+        area: false,
+      }];
+    }
+    // @deprecated try to use evolutionGraphFactory.service intead.
+    function addResultsToGraph(graphData, periodsWithMapResults, selectedDimension) {
+      var newGraphData = [graphData[0]];
+      var colorIndex = 1;
+      var evolutionData = _.reduce(periodsWithMapResults, function (result, periodWithMapResults) {
+        _.each(periodWithMapResults.mapResults, function (mapLine) {
+          if (!result[mapLine.value]) {
+            result[mapLine.value] = {
+              key: $filter('translate')($filter('specialAttributeValueToReadableString')(mapLine.value, selectedDimension)),
+              area: false,
+              color: Theme.getGraphCurvesColor(colorIndex++),
+              values: [],
+            };
+          }
+          if (mapLine.error) {
+            result[mapLine.value].values.push({
+              x: moment(periodWithMapResults.beginsAt),
+              y: null,
+              mapResults: mapLine,
+            });
+          } else {
+            result[mapLine.value].values.push({
+              x: moment(periodWithMapResults.beginsAt),
+              y: $filter('round')(mapLine.superscore),
+              mapResults: mapLine,
+            });
+          }
+        });
+        return result;
+      }, {});
+
+      _.each(evolutionData, function (data) {
+        newGraphData.push(data);
+      });
+      return newGraphData;
+    }
+    // @deprecated try to use evolutionGraphFactory.service intead.
+    function getOptions(periods, selectedDimension) {
+      var yTickValues = [-100, 0, 100];
+      var xTickValues = _.map(periods, function (dataPoint) { return moment(dataPoint.beginsAt); });
+
+      var maxXTicks = 6;
+      var stride = Math.ceil(xTickValues.length / maxXTicks);
+      xTickValues = _.filter(xTickValues, function (v, i) { return i % stride === 0; });
+
+      return {
+        chart: {
+          type: 'lineChart',
+          height: 350,
+          pointSize: function (d) { return d.y === null ? 0 : 20; },
+          interpolate: 'cardinal',
+          margin: {
+            top: 20,
+            right: 0,
+            bottom: 40,
+            left: 40,
+          },
+          x: function (d) { if (d) { return d.x; } return null; },
+          y: function (d) { if (d) { return d.y; } return null; },
+          useInteractiveGuideline: true,
+          showLegend: true,
+          legend: {
+            margin: {
+              top: 20,
+              right: 0,
+              bottom: 0,
+              left: 0,
+            },
+            padding: 30,
+            maxKeyLength: 20, // 50 char tops
+          },
+          legendPosition: 'bottom',
+          xAxis: {
+            showMaxMin: false,
+            tickFormat: function (d) {
+              return d.format('ll');
+            },
+            tickPadding: 10,
+            tickValues: xTickValues,
+          },
+          yAxis: {
+            tickFormat: function (val) {
+              if (val === 100) {
+                return '+100';
+              }
+              return val;
+            },
+            tickPadding: 10,
+            tickValues: yTickValues,
+          },
+          forceY: [-100, 100],
+          callback: function (chart) {
+            if (!chart) {
+              return chart;
+            }
+            var tooltip = chart.interactiveLayer.tooltip;
+            tooltip.gravity('s');
+            tooltip.contentGenerator(function (data) {
+              var globalSuperscore = data.series[0];
+              var retTooltip = '';
+              var hasSuperscore = false;
+              if (globalSuperscore.data.period) {
+                if (globalSuperscore.data.period.error) {
+                  return $filter('translate')(globalSuperscore.data.period.error);
+                }
+                hasSuperscore = true;
+                retTooltip = $filter('bind')($filter('translate')('ds_evolutionTooltip'),
+                  $filter('superscoreColor')(globalSuperscore.value),
+                  $filter('round')(globalSuperscore.value),
+                  $filter('round')(globalSuperscore.data.period.promotersPercentage),
+                  $filter('round')(globalSuperscore.data.period.neutralsPercentage),
+                  $filter('round')(globalSuperscore.data.period.detractorsPercentage),
+                  $filter('round')(globalSuperscore.data.period.answerCount)
+                ) + '<br>';
+              }
+              var addPartial = false;
+              var partial = '<table style=\"width: 95%;\"><thead><tr><td class=\"legend-color-guide\" colspan=\"3\"><strong>' + $filter('translate')('ds_teamsTooltip') + '</strong></td></tr></thead><tbody><tr><td height=\"10px\"></td></tr>';
+              _.each(data.series, function (dataLine, j) {
+                if (j === 0 && hasSuperscore) {
+                  return;
+                }
+                var actualLine = null;
+                var currentPeriod = _.find(periods, function (p) {
+                  return moment(p.beginsAt).diff(data.value) === 0;
+                });
+                if (currentPeriod) {
+                  var foundMapResults = _.find(currentPeriod.mapResults, function (mapLine) {
+                    return $filter('translate')($filter('specialAttributeValueToReadableString')(mapLine.value, selectedDimension)) === dataLine.key;
+                  });
+                  if (foundMapResults) {
+                    actualLine = foundMapResults;
+                  }
+                }
+                var lastCells = '';
+                if (actualLine) {
+                  if (actualLine.error) {
+                    lastCells = '<td colspan="2">' + $filter('translate')('ssp_notEnoughPeriodAnswers') + '</td>';
+                  } else {
+                    var tooltipValue = $filter('round')(actualLine.superscore);
+                    var peopleStatistics = actualLine.answerCount + ' ' + $filter('translate')('ssp_answers');
+                    lastCells = '<td style="text-align: right;">' + peopleStatistics + '</td><td class=\"value\" style="color: ' + $filter('superscoreColor')(tooltipValue) + '">' + tooltipValue + '</td>';
+                  }
+                }
+                var lineClass = '';
+                if (dataLine.highlight) {
+                  lineClass = 'class="highlight"';
+                }
+                partial += '<tr ' + lineClass + '><td class=\"legend-color-guide\" style=\"width: 1px;\"><div style=\"background-color:' + dataLine.color + '\"></div></td><td class=\"key\">' + dataLine.key + '</td>' + lastCells + '</tr>';
+                addPartial = true;
+              });
+              partial += '<tr><td height=\"10px\"></td></tr></tbody></table>';
+              return retTooltip + (addPartial ? partial : ' ');
+            });
+            return chart;
+          },
+        },
+      };
+    }
+
+    /* ******************************* *
+     *   Hierarchy filter functions    *
+     * ******************************* */
+
+    function setHierarchyFilter(hierarchyKey) {
+      selectedHierarchyFilterKey = hierarchyKey;
+      notifyFilterObservers();
+    }
+
+    function getHierarchyFilter() {
+      return selectedHierarchyFilterKey;
+    }
+
+    function registerFilterObserver(observer) {
+      if (!angular.isFunction(observer)) {
+        throw Error('observer must be a function');
+      }
+      filterObservers.push(observer);
+    }
+
+    function unregisterFilterObserver(observer) {
+      var deletedObserverIndex = null;
+      for (var i = 0; i < filterObservers.length; i++) {
+        if (filterObservers[i] === observer) {
+          deletedObserverIndex = i;
+          break;
+        }
+      }
+      if (deletedObserverIndex !== null) {
+        filterObservers.splice(deletedObserverIndex, 1);
+      }
+    }
+
+    function notifyFilterObservers() {
+      for (var i = 0; i < filterObservers.length; i++) {
+        filterObservers[i]();
+      }
+    }
+  }
+})();

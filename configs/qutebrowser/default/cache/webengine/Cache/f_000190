@@ -1,0 +1,719 @@
+/* line 103, _theme.mixins.scss */
+.reset-button {
+  border: none;
+  margin: 0;
+  padding: 0;
+  width: auto;
+  overflow: visible;
+  background: transparent;
+  /* inherit font & color from ancestor */
+  color: inherit;
+  font: inherit;
+  /* Normalize `line-height`. Cannot be changed from `normal` in Firefox 4+. */
+  line-height: normal;
+  /* Corrects font smoothing for webkit */
+  -webkit-font-smoothing: inherit;
+  -moz-osx-font-smoothing: inherit;
+  /* Corrects inability to style clickable `input` types in iOS */
+  -webkit-appearance: none;
+  /* Remove excess padding and border in Firefox 4+ */
+}
+/* line 98, _theme.mixins.scss */
+.reset-button::-moz-focus-inner {
+  border: 0;
+  padding: 0;
+}
+
+/* line 3, overrides.scss */
+* {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+
+/* line 8, overrides.scss */
+*:before,
+*:after {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+
+/* line 15, overrides.scss */
+a, [href] {
+  color: #2566c5;
+}
+
+/* line 18, overrides.scss */
+a:hover, [href]:hover {
+  color: #23527c;
+}
+
+/* line 22, overrides.scss */
+a:hover, a:focus, a:active {
+  text-decoration: none;
+}
+
+/* line 26, overrides.scss */
+[scroll-to],
+[ng-click],
+[dropdown-toggle],
+[href] * {
+  cursor: pointer;
+}
+
+/* line 33, overrides.scss */
+[contenteditable] {
+  cursor: text;
+}
+
+/* line 37, overrides.scss */
+[contenteditable]:focus {
+  border: 1px solid;
+  margin: -1px;
+  border-radius: 4px;
+  border-color: #66afe9;
+  outline: 0;
+  -moz-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(102, 175, 233, 0.6);
+  -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(102, 175, 233, 0.6);
+  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(102, 175, 233, 0.6);
+}
+
+/* line 47, overrides.scss */
+.ui-select-container.open .ui-select-search {
+  border-bottom-left-radius: 0px;
+  border-bottom-right-radius: 0px;
+}
+
+/* line 51, overrides.scss */
+.ui-select-choices.ui-select-choices-content {
+  border-top-left-radius: 0px;
+  border-top-right-radius: 0px;
+}
+
+/* line 55, overrides.scss */
+.ui-select-match {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* line 60, overrides.scss */
+.form-control {
+  height: 36px;
+}
+
+/* line 65, overrides.scss */
+.select.select-clear .ui-select-match {
+  display: block !important;
+}
+/* line 67, overrides.scss */
+.select.select-clear .ui-select-match .ui-select-toggle > .caret {
+  right: 1.5em;
+  color: #0d0d0d;
+}
+/* line 71, overrides.scss */
+.select.select-clear .ui-select-match .form-control.ui-select-toggle {
+  background: #e6e6e6;
+  padding: 5%;
+  padding-right: 10%;
+  height: auto;
+}
+/* line 76, overrides.scss */
+.select.select-clear .ui-select-match .form-control.ui-select-toggle .text-muted {
+  color: #999999;
+}
+/* line 80, overrides.scss */
+.select.select-clear .ui-select-match .form-control:hover {
+  box-shadow: none;
+  border: none;
+}
+/* line 84, overrides.scss */
+.select.select-clear .ui-select-match .ui-select-match-text {
+  float: none !important;
+  color: #000;
+}
+/* line 89, overrides.scss */
+.select.select-clear .ui-select-choices-row {
+  background: #f2f2f2;
+}
+/* line 91, overrides.scss */
+.select.select-clear .ui-select-choices-row .ui-select-choices-row-inner {
+  padding: 5%;
+  color: #000;
+  font-weight: 300;
+  font-size: 1em;
+}
+/* line 99, overrides.scss */
+.select.select-clear .ui-select-choices-row.active .ui-select-choices-row-inner {
+  padding: 5%;
+  color: #000;
+  font-weight: 300;
+}
+/* line 105, overrides.scss */
+.select.select-clear .ui-select-choices-row.active > a.ui-select-choices-row-inner {
+  background: #e6e6e6;
+}
+
+/* line 111, overrides.scss */
+.select.select-clear:hover .ui-select-match .ui-select-toggle > .caret {
+  color: #000;
+}
+/* line 114, overrides.scss */
+.select.select-clear:hover .ui-select-match .form-control {
+  box-shadow: none;
+  border: none;
+}
+/* line 118, overrides.scss */
+.select.select-clear:hover .ui-select-match .ui-select-match-text {
+  color: #000;
+}
+
+/* line 126, overrides.scss */
+.color-picker-wrapper .color-picker-panel {
+  padding: 4px 4px 4px 8px;
+}
+/* line 130, overrides.scss */
+.color-picker-wrapper .color-picker-panel.color-picker-panel-top {
+  top: -162px;
+}
+/* line 135, overrides.scss */
+.color-picker-wrapper .color-picker-panel .color-picker-hue {
+  left: 160px;
+}
+/* line 139, overrides.scss */
+.color-picker-wrapper .color-picker-panel .color-picker-panel .color-picker-grid {
+  top: 5px;
+  left: 5px;
+}
+/* line 143, overrides.scss */
+.color-picker-wrapper .color-picker-panel .color-picker-panel .color-picker-hue, .color-picker-wrapper .color-picker-panel .color-picker-panel .color-picker-opacity {
+  top: 5px;
+}
+
+/* line 150, overrides.scss */
+.checkbox input[type="checkbox"].custom-checkbox:indeterminate + .icons:before,
+.radio input[type="checkbox"].custom-checkbox:indeterminate + .icons:before,
+.checkbox input[type="radio"].custom-radio:indeterminate + .icons:before,
+.radio input[type="radio"].custom-radio:indeterminate + .icons:before {
+  display: none;
+}
+
+/* line 157, overrides.scss */
+.ui-slider {
+  background: #E5E5E5;
+  border-radius: 5px;
+  width: 180px;
+  margin: 25px auto;
+  height: 12px;
+  -webkit-box-shadow: none;
+  box-shadow: none;
+  margin-bottom: 38px;
+  position: relative;
+  cursor: pointer;
+  padding: 0 3px;
+  border: none;
+  /* custom things in ui slider */
+}
+/* line 171, overrides.scss */
+.ui-slider .bubble {
+  position: relative;
+  width: 35px;
+  padding: 0px;
+  background: #1abc9c;
+  -webkit-border-radius: 0px;
+  -moz-border-radius: 0px;
+  border-radius: 0px;
+  margin-left: -18px;
+  top: 22px;
+  z-index: 2;
+  font-family: Lato, Arial, sans-serif;
+  font-weight: 900;
+  font-size: 1em;
+}
+/* line 186, overrides.scss */
+.ui-slider .bubble:after {
+  content: '';
+  position: absolute;
+  border-style: solid;
+  border-width: 0 3px 4px;
+  border-color: #1abc9c transparent;
+  display: block;
+  width: 0;
+  z-index: 1;
+  top: -4px;
+  left: 15px;
+}
+/* line 198, overrides.scss */
+.ui-slider .slideText {
+  padding: 1px 0px 0px 0px;
+  text-align: center;
+}
+/* line 202, overrides.scss */
+.ui-slider .slideText .slideTextSymbol {
+  font-size: 0.9em;
+}
+/* line 205, overrides.scss */
+.ui-slider .ui-slider-handle {
+  background: #16a085;
+  border-radius: 50%;
+  cursor: pointer;
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  z-index: 2;
+  -webkit-transition: background 0.25s;
+  transition: background 0.25s;
+  border: none;
+}
+/* line 217, overrides.scss */
+.ui-slider .ui-slider-handle:hover,
+.ui-slider .ui-slider-handle:focus {
+  background: #48c9b0;
+  outline: none;
+}
+/* line 222, overrides.scss */
+.ui-slider .ui-slider-handle:active {
+  background: #16a085;
+}
+/* line 225, overrides.scss */
+.ui-slider .ui-slider-range {
+  background: #1abc9c;
+  display: block;
+  height: 8px;
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  z-index: 1;
+}
+/* line 234, overrides.scss */
+.ui-slider .ui-slider-segment {
+  background-color: #d9dbdd;
+  border-radius: 50%;
+  height: 6px;
+  width: 6px;
+}
+/* line 240, overrides.scss */
+.ui-slider .ui-slider-value {
+  float: right;
+  font-size: 13px;
+  margin-top: 12px;
+}
+/* line 245, overrides.scss */
+.ui-slider .ui-slider-value.first {
+  clear: left;
+  float: left;
+}
+
+/* line 250, overrides.scss */
+.ui-slider.ng-pristine .bubble {
+  display: none;
+}
+
+/* line 254, overrides.scss */
+.ui-slider-horizontal .ui-slider-handle {
+  margin-left: -8px;
+  top: -2px;
+}
+/* line 261, overrides.scss */
+.ui-slider-horizontal .ui-slider-range {
+  border-radius: 30px 0 0 30px;
+}
+/* line 264, overrides.scss */
+.ui-slider-horizontal .ui-slider-segment {
+  float: left;
+  margin: 3px -6px 0 0;
+}
+
+/* line 269, overrides.scss */
+.ui-slider-vertical {
+  width: 12px;
+}
+/* line 271, overrides.scss */
+.ui-slider-vertical .ui-slider-handle {
+  margin-left: -3px;
+  margin-bottom: -11px;
+  top: auto;
+}
+/* line 276, overrides.scss */
+.ui-slider-vertical .ui-slider-range {
+  width: 100%;
+  bottom: 0;
+  border-radius: 0 0 30px 30px;
+}
+/* line 281, overrides.scss */
+.ui-slider-vertical .ui-slider-segment {
+  position: absolute;
+  right: 3px;
+}
+
+/* line 287, overrides.scss */
+.btn-default {
+  color: #333333;
+  border-color: transparent;
+  background-color: transparent;
+}
+
+/* line 292, overrides.scss */
+.btn-default:hover {
+  color: #000;
+  background-color: transparent;
+  border-color: #b3b3b3;
+}
+
+/* line 297, overrides.scss */
+.btn-primary {
+  color: #3794ff;
+  text-transform: uppercase;
+  font-family: Lato, Arial, sans-serif;
+  border-color: transparent;
+  background-color: transparent;
+}
+
+/* line 304, overrides.scss */
+.btn-primary:hover {
+  color: #3794ff;
+  background-color: transparent;
+  border-color: #3794ff;
+}
+
+/* line 309, overrides.scss */
+.btn-primary.disabled, .btn-primary[disabled], fieldset[disabled] .btn-primary, .btn-primary.disabled:hover, .btn-primary[disabled]:hover, fieldset[disabled] .btn-primary:hover, .btn-primary.disabled:focus, .btn-primary[disabled]:focus, fieldset[disabled] .btn-primary:focus, .btn-primary.disabled.focus, .btn-primary[disabled].focus, fieldset[disabled] .btn-primary.focus, .btn-primary.disabled:active, .btn-primary[disabled]:active, fieldset[disabled] .btn-primary:active, .btn-primary.disabled.active, .btn-primary[disabled].active, fieldset[disabled] .btn-primary.active {
+  background-color: #FFF;
+  border-color: #3794ff;
+}
+
+/* line 314, overrides.scss */
+.btn-success {
+  color: #16a085;
+  text-transform: uppercase;
+  font-family: Lato, Arial, sans-serif;
+  border-color: transparent;
+  background-color: transparent;
+}
+
+/* line 321, overrides.scss */
+.btn-success:hover {
+  color: #16a085;
+  background-color: transparent;
+  border-color: #16a085;
+}
+
+/* line 326, overrides.scss */
+.btn-success.disabled, .btn-success[disabled], fieldset[disabled] .btn-success, .btn-success.disabled:hover, .btn-success[disabled]:hover, fieldset[disabled] .btn-success:hover, .btn-success.disabled:focus, .btn-success[disabled]:focus, fieldset[disabled] .btn-success:focus, .btn-success.disabled.focus, .btn-success[disabled].focus, fieldset[disabled] .btn-success.focus, .btn-success.disabled:active, .btn-success[disabled]:active, fieldset[disabled] .btn-success:active, .btn-success.disabled.active, .btn-success[disabled].active, fieldset[disabled] .btn-success.active {
+  background-color: #FFF;
+  border-color: transparent;
+}
+
+/* line 330, overrides.scss */
+.btn.disabled, .btn[disabled], fieldset[disabled] .btn {
+  opacity: .75;
+}
+
+/* line 333, overrides.scss */
+.ladda-spinner [role=progressbar] div {
+  background: #3794ff !important;
+}
+
+/* line 336, overrides.scss */
+.ladda-button.btn.ng-hide {
+  -moz-transition: none !important;
+  -o-transition: none !important;
+  -webkit-transition: none !important;
+  transition: none !important;
+}
+
+/* line 341, overrides.scss */
+.v2 .btn {
+  font-family: Lato, Arial, sans-serif;
+  padding: 10px 20px 8px 20px;
+  font-size: 12px;
+  font-weight: 700;
+  border-radius: 2px;
+  border: 1px solid transparent;
+  outline: none;
+  box-shadow: none;
+  text-transform: initial;
+  background-position: initial;
+  background-repeat: initial;
+  text-shadow: none;
+}
+/* line 355, overrides.scss */
+.v2 .btn i.fa,
+.v2 .btn i.si {
+  font-size: 16px;
+  line-height: 0;
+  vertical-align: middle;
+}
+/* line 361, overrides.scss */
+.v2 .btn.btn-small {
+  padding: 7px 10px 5px 10px;
+}
+/* line 364, overrides.scss */
+.v2 .btn.btn-uppercase {
+  text-transform: uppercase;
+  padding-bottom: 7px;
+}
+/* line 368, overrides.scss */
+.v2 .btn:disabled:hover,
+.v2 .btn[disabled]:hover {
+  outline: none;
+  border-color: transparent;
+}
+/* line 373, overrides.scss */
+.v2 .btn.btn-default {
+  color: #ffffff;
+  background-image: url('data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4gPHN2ZyB2ZXJzaW9uPSIxLjEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PGxpbmVhckdyYWRpZW50IGlkPSJncmFkIiBncmFkaWVudFVuaXRzPSJvYmplY3RCb3VuZGluZ0JveCIgeDE9IjAuNSIgeTE9IjAuMCIgeDI9IjAuNSIgeTI9IjEuMCI+PHN0b3Agb2Zmc2V0PSIwJSIgc3RvcC1jb2xvcj0iIzM3OTRmZiIvPjxzdG9wIG9mZnNldD0iMTAwJSIgc3RvcC1jb2xvcj0iIzA0NzlmZiIvPjwvbGluZWFyR3JhZGllbnQ+PC9kZWZzPjxyZWN0IHg9IjAiIHk9IjAiIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JhZCkiIC8+PC9zdmc+IA==');
+  background-size: 100%;
+  background-image: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #3794ff), color-stop(100%, #0479ff));
+  background-image: -moz-linear-gradient(top, #3794ff, #0479ff);
+  background-image: -webkit-linear-gradient(top, #3794ff, #0479ff);
+  background-image: linear-gradient(to bottom, #3794ff, #0479ff);
+}
+/* line 377, overrides.scss */
+.v2 .btn.btn-default:not([disabled]):hover {
+  -moz-box-shadow: 0px 4px 18px -9px black inset;
+  -webkit-box-shadow: 0px 4px 18px -9px black inset;
+  box-shadow: 0px 4px 18px -9px black inset;
+  -moz-transition: box-shadow 0.3s;
+  -o-transition: box-shadow 0.3s;
+  -webkit-transition: box-shadow 0.3s;
+  transition: box-shadow 0.3s;
+}
+/* line 381, overrides.scss */
+.v2 .btn.btn-default:not([disabled]):focus {
+  outline: none;
+  color: #ffffff;
+  background-image: url('data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4gPHN2ZyB2ZXJzaW9uPSIxLjEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PGxpbmVhckdyYWRpZW50IGlkPSJncmFkIiBncmFkaWVudFVuaXRzPSJvYmplY3RCb3VuZGluZ0JveCIgeDE9IjAuNSIgeTE9IjAuMCIgeDI9IjAuNSIgeTI9IjEuMCI+PHN0b3Agb2Zmc2V0PSIwJSIgc3RvcC1jb2xvcj0iIzAwNjFkMCIvPjxzdG9wIG9mZnNldD0iMTAwJSIgc3RvcC1jb2xvcj0iIzA0NzlmZiIvPjwvbGluZWFyR3JhZGllbnQ+PC9kZWZzPjxyZWN0IHg9IjAiIHk9IjAiIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JhZCkiIC8+PC9zdmc+IA==');
+  background-size: 100%;
+  background-image: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #0061d0), color-stop(100%, #0479ff));
+  background-image: -moz-linear-gradient(top, #0061d0, #0479ff);
+  background-image: -webkit-linear-gradient(top, #0061d0, #0479ff);
+  background-image: linear-gradient(to bottom, #0061d0, #0479ff);
+}
+/* line 386, overrides.scss */
+.v2 .btn-default .ladda-spinner [role=progressbar] div {
+  background-color: #ffffff !important;
+}
+
+/* line 391, overrides.scss */
+.sk-fading-circle .sk-circle {
+  margin: 0;
+}
+
+/* line 395, overrides.scss */
+.sk-three-bounce {
+  margin: 2em auto;
+  width: 4em;
+}
+/* line 398, overrides.scss */
+.sk-three-bounce .sk-child {
+  width: 1em;
+  height: 1em;
+}
+
+/* line 404, overrides.scss */
+.no-anim {
+  -moz-transition: none !important;
+  -o-transition: none !important;
+  -webkit-transition: none !important;
+  transition: none !important;
+  -moz-animation: none !important;
+  -webkit-animation: none !important;
+  animation: none !important;
+}
+
+/* line 409, overrides.scss */
+.ng-select {
+  cursor: pointer;
+}
+/* line 411, overrides.scss */
+.ng-select .ng-select-container {
+  padding: 9px 8px 8px 8px;
+  border-radius: 7px;
+  border: 1px solid #97a0a9;
+  background-color: white;
+  padding: 9px 8px 6px 8px;
+}
+/* line 414, overrides.scss */
+.ng-select .ng-select-container .ng-value-container {
+  padding-top: 1px;
+}
+/* line 416, overrides.scss */
+.ng-select .ng-select-container .ng-value-container .ng-placeholder {
+  color: #97a0a9;
+}
+/* line 419, overrides.scss */
+.ng-select .ng-select-container .ng-value-container .ng-value {
+  padding: 4px 5px 2px;
+  border-radius: 7px;
+  border: 1px solid #384555;
+  margin-right: 7px;
+  margin-top: 4px;
+}
+/* line 425, overrides.scss */
+.ng-select .ng-select-container .ng-value-container .ng-value.ng-value-disabled {
+  border-color: #97a0a9;
+  background-color: white;
+  color: #97a0a9;
+}
+/* line 430, overrides.scss */
+.ng-select .ng-select-container .ng-value-container .ng-value .ng-value-icon {
+  float: right;
+  font-size: 18px;
+  color: #97a0a9;
+  margin-top: -1px;
+  margin-left: 4px;
+  height: 10px;
+}
+/* line 440, overrides.scss */
+.ng-select .ng-select-container.ng-has-value {
+  padding: 0 6px 5px 6px;
+}
+/* line 442, overrides.scss */
+.ng-select .ng-select-container.ng-has-value .ng-input > input {
+  padding: 8px 0 4px;
+}
+/* line 445, overrides.scss */
+.ng-select .ng-select-container.ng-has-value .ng-placeholder {
+  display: none;
+}
+/* line 448, overrides.scss */
+.ng-select .ng-select-container.ng-has-value .ng-arrow-wrapper {
+  padding: 8.5px 5px 0px;
+}
+/* line 452, overrides.scss */
+.ng-select .ng-select-container .ng-arrow-wrapper {
+  padding: 0 4px;
+}
+/* line 454, overrides.scss */
+.ng-select .ng-select-container .ng-arrow-wrapper .ng-arrow {
+  background: url(/img/select-arrow.svg);
+  width: 12px;
+  height: 7px;
+}
+/* line 463, overrides.scss */
+.ng-select.ng-select-opened .ng-arrow-wrapper .ng-arrow {
+  -webkit-transform: rotate(180deg);
+  -moz-transform: rotate(180deg);
+  -ms-transform: rotate(180deg);
+  -o-transform: rotate(180deg);
+  transform: rotate(180deg);
+}
+/* line 469, overrides.scss */
+.ng-select.ng-invalid .ng-select-container {
+  border-color: #eb3324;
+}
+
+/* line 475, overrides.scss */
+.ng-dropdown-panel {
+  padding: 5px 2px;
+  background-color: white;
+  border-radius: 6px;
+  -webkit-box-shadow: 0px 2px 10px 0px rgba(62, 69, 128, 0.05);
+  -moz-box-shadow: 0px 2px 10px 0px rgba(62, 69, 128, 0.05);
+  box-shadow: 0px 2px 10px 0px rgba(62, 69, 128, 0.05);
+}
+/* line 481, overrides.scss */
+.ng-dropdown-panel .ng-dropdown-panel-items .ng-option {
+  padding: 4px 4px 2px 4px;
+  border-radius: 2px;
+  margin-bottom: 2px;
+}
+/* line 485, overrides.scss */
+.ng-dropdown-panel .ng-dropdown-panel-items .ng-option:last-child {
+  margin-bottom: 0;
+}
+/* line 488, overrides.scss */
+.ng-dropdown-panel .ng-dropdown-panel-items .ng-option.ng-option-marked, .ng-dropdown-panel .ng-dropdown-panel-items .ng-option.ng-option-selected, .ng-dropdown-panel .ng-dropdown-panel-items .ng-option:hover {
+  background-color: #3794ff;
+  color: white;
+}
+/* line 492, overrides.scss */
+.ng-dropdown-panel .ng-dropdown-panel-items .ng-option.ng-option-disabled {
+  color: #97a0a9;
+  background-color: white;
+  cursor: default;
+}
+
+/* line 501, overrides.scss */
+.form-element-error {
+  color: #eb3324;
+  font-family: Lato, Arial, sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  margin-top: 4px;
+}
+
+/* line 510, overrides.scss */
+.modal-v2 .modal-header {
+  margin: 0 1px;
+  padding: 20px;
+  padding-left: 30px;
+  background-color: #F2F4F6;
+  display: flex;
+  align-items: center;
+  justify-content: normal;
+  border-radius: 6px 6px 0 0;
+}
+/* line 519, overrides.scss */
+.modal-v2 .modal-header .modal-title {
+  font-size: 16px;
+  color: #384555;
+  flex-grow: 1;
+}
+/* line 527, overrides.scss */
+.modal-v2 .modal-header .modal-close {
+  height: 35px;
+  width: 35px;
+  border: 2px solid #97a0a9;
+  border-radius: 100%;
+  display: block;
+  position: relative;
+  -moz-transition: 0.3s;
+  -o-transition: 0.3s;
+  -webkit-transition: 0.3s;
+  transition: 0.3s;
+}
+/* line 535, overrides.scss */
+.modal-v2 .modal-header .modal-close:before, .modal-v2 .modal-header .modal-close:after {
+  content: '';
+  border-bottom: 2px solid #97a0a9;
+  display: block;
+  position: absolute;
+  width: 56%;
+  top: 15px;
+  left: 7px;
+  -moz-transition: 0.3s;
+  -o-transition: 0.3s;
+  -webkit-transition: 0.3s;
+  transition: 0.3s;
+}
+/* line 545, overrides.scss */
+.modal-v2 .modal-header .modal-close:after {
+  -webkit-transform: rotate(45deg);
+  -moz-transform: rotate(45deg);
+  -ms-transform: rotate(45deg);
+  -o-transform: rotate(45deg);
+  transform: rotate(45deg);
+}
+/* line 548, overrides.scss */
+.modal-v2 .modal-header .modal-close:before {
+  -webkit-transform: rotate(-45deg);
+  -moz-transform: rotate(-45deg);
+  -ms-transform: rotate(-45deg);
+  -o-transform: rotate(-45deg);
+  transform: rotate(-45deg);
+}
+/* line 551, overrides.scss */
+.modal-v2 .modal-header .modal-close:hover, .modal-v2 .modal-header .modal-close:focus {
+  outline: none;
+  border: 2px solid #3794ff;
+}
+/* line 554, overrides.scss */
+.modal-v2 .modal-header .modal-close:hover:before, .modal-v2 .modal-header .modal-close:hover:after, .modal-v2 .modal-header .modal-close:focus:before, .modal-v2 .modal-header .modal-close:focus:after {
+  border-bottom: 2px solid #3794ff;
+}
+/* line 560, overrides.scss */
+.modal-v2 .modal-body {
+  line-height: 1.4em;
+}

@@ -1,0 +1,660 @@
+/* line 103, ../../shared/_theme.mixins.scss */
+.reset-button {
+  border: none;
+  margin: 0;
+  padding: 0;
+  width: auto;
+  overflow: visible;
+  background: transparent;
+  /* inherit font & color from ancestor */
+  color: inherit;
+  font: inherit;
+  /* Normalize `line-height`. Cannot be changed from `normal` in Firefox 4+. */
+  line-height: normal;
+  /* Corrects font smoothing for webkit */
+  -webkit-font-smoothing: inherit;
+  -moz-osx-font-smoothing: inherit;
+  /* Corrects inability to style clickable `input` types in iOS */
+  -webkit-appearance: none;
+  /* Remove excess padding and border in Firefox 4+ */
+}
+/* line 98, ../../shared/_theme.mixins.scss */
+.reset-button::-moz-focus-inner {
+  border: 0;
+  padding: 0;
+}
+
+/* line 5, superscore.scss */
+#superscore .superscore-bar {
+  display: table;
+  width: 100%;
+  height: 22px;
+  min-width: 50px;
+}
+/* line 11, superscore.scss */
+#superscore .ss-bar {
+  font-size: 9px;
+  text-align: center;
+  vertical-align: middle;
+  color: white;
+  font-weight: 700;
+}
+/* line 18, superscore.scss */
+#superscore .ss-bar-promoters {
+  display: table-cell;
+}
+/* line 20, superscore.scss */
+#superscore .ss-bar-promoters .ss-bar-content {
+  background: linear-gradient(to bottom, #3794ff, #0479ff);
+  border: 1px solid #0061d0;
+}
+/* line 26, superscore.scss */
+#superscore .ss-bar-neutrals {
+  display: table-cell;
+}
+/* line 28, superscore.scss */
+#superscore .ss-bar-neutrals .ss-bar-content {
+  background: linear-gradient(to bottom, #c45fff, #b12cff);
+  border: 1px solid #9d00f8;
+}
+/* line 34, superscore.scss */
+#superscore .ss-bar-detractors {
+  display: table-cell;
+}
+/* line 36, superscore.scss */
+#superscore .ss-bar-detractors .ss-bar-content {
+  background: linear-gradient(to bottom, #ff0000, #cc0000);
+  border: 1px solid #990000;
+}
+/* line 42, superscore.scss */
+#superscore .ss-bar-content {
+  padding: 4px 2px 2px 2px;
+}
+/* line 45, superscore.scss */
+#superscore .ss-bar-promoters:not(:first-child) .ss-bar-content {
+  border-left: 0;
+}
+/* line 48, superscore.scss */
+#superscore .ss-bar-detractors:not(:last-child) .ss-bar-content {
+  border-right: 0;
+}
+/* line 51, superscore.scss */
+#superscore .ss-bar-neutrals:not(:last-child) .ss-bar-content {
+  border-right-color: #4f31e4;
+}
+/* line 54, superscore.scss */
+#superscore .ss-bar-neutrals:not(:first-child) .ss-bar-content {
+  border-left-color: #9b007c;
+}
+/* line 57, superscore.scss */
+#superscore .ss-bar:first-child .ss-bar-content {
+  border-top-left-radius: 3px;
+  border-bottom-left-radius: 3px;
+}
+/* line 61, superscore.scss */
+#superscore .ss-bar:last-child .ss-bar-content {
+  border-top-right-radius: 3px;
+  border-bottom-right-radius: 3px;
+}
+/* line 67, superscore.scss */
+#superscore .superscore-periods tr > th {
+  padding-bottom: 7px;
+}
+/* line 71, superscore.scss */
+#superscore .superscore-periods tr.ss-period-row {
+  border-bottom: 1px solid #ddd;
+  font-size: 10px;
+}
+/* line 75, superscore.scss */
+#superscore .superscore-periods tr.ss-period-row > td {
+  padding: 4px 0px;
+}
+/* line 79, superscore.scss */
+#superscore .superscore-periods tr.ss-period-row:first-child {
+  border-top: 1px solid #ddd;
+}
+/* line 82, superscore.scss */
+#superscore .superscore-periods tr.ss-period-row > td:not(:last-child), #superscore .superscore-periods tr > th:not(:last-child) {
+  padding-right: 10px;
+}
+/* line 85, superscore.scss */
+#superscore .superscore-periods tr.ss-period-row > td:not(:first-child), #superscore .superscore-periods tr > th:not(:first-child) {
+  padding-left: 10px;
+}
+/* line 91, superscore.scss */
+#superscore #global h4 {
+  font-weight: 700;
+}
+/* line 94, superscore.scss */
+#superscore #global .dropdown-menu {
+  padding: 12px 0px 0px 0px;
+  min-width: 250px;
+}
+/* line 97, superscore.scss */
+#superscore #global .dropdown-menu h6 {
+  padding: 0 20px;
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+/* line 103, superscore.scss */
+#superscore #global .dropdown-menu .displayed-teams-list {
+  max-height: 200px;
+  overflow-y: auto;
+  padding: 0px 20px 11px 20px;
+}
+/* line 109, superscore.scss */
+#superscore #global .dropdown-menu {
+  border-radius: 2px;
+  background-color: #ffffff;
+  border: none;
+  margin-top: 3px;
+  -moz-box-shadow: 0 0 2px 0 rgba(0, 0, 0, 0.5);
+  -webkit-box-shadow: 0 0 2px 0 rgba(0, 0, 0, 0.5);
+  box-shadow: 0 0 2px 0 rgba(0, 0, 0, 0.5);
+}
+/* line 117, superscore.scss */
+#superscore #global .hyperlink {
+  color: #777;
+}
+/* line 120, superscore.scss */
+#superscore #global .hyperlink:hover {
+  color: #23527c;
+}
+/* line 125, superscore.scss */
+#superscore #global #superscore-widget .super-window {
+  border-right: 1px solid #e6eaed;
+}
+/* line 128, superscore.scss */
+#superscore #global #superscore-widget .widget-nav {
+  font-size: 14px;
+  text-align: center;
+  margin-bottom: 20px;
+}
+/* line 132, superscore.scss */
+#superscore #global #superscore-widget .widget-nav > div {
+  display: inline-block;
+}
+/* line 135, superscore.scss */
+#superscore #global #superscore-widget .widget-nav div.dates {
+  text-align: center;
+  margin: 0px 8px;
+}
+/* line 140, superscore.scss */
+#superscore #global #superscore-widget .button-previous, #superscore #global #superscore-widget .button-next {
+  display: inline-block;
+  font-weight: 700;
+  font-size: 20px;
+  vertical-align: middle;
+  color: #777;
+}
+/* line 147, superscore.scss */
+#superscore #global #superscore-widget .button-previous:hover, #superscore #global #superscore-widget .button-next:hover {
+  color: #384555;
+}
+/* line 150, superscore.scss */
+#superscore #global #superscore-widget .limit {
+  color: #e6e6e6;
+}
+/* line 153, superscore.scss */
+#superscore #global #superscore-widget .limit:hover {
+  color: #e6e6e6;
+}
+/* line 158, superscore.scss */
+#superscore #global #superscore-widget .nps-numbers td {
+  padding: 7px 0px;
+}
+/* line 161, superscore.scss */
+#superscore #global #superscore-widget .nps-numbers td:last-child {
+  padding-right: 25px;
+}
+/* line 167, superscore.scss */
+#superscore #global .nvd3.nv-line .nvd3.nv-scatter .nv-groups .nv-point {
+  stroke-width: 2px;
+  stroke: #3794ff;
+}
+/* line 173, superscore.scss */
+#superscore .evo {
+  border-top: 1px solid #e6eaed;
+}
+/* line 177, superscore.scss */
+#superscore .super-alerting td {
+  padding: 10px;
+}
+/* line 181, superscore.scss */
+#superscore .super-alerting td:first-child {
+  padding-left: 0;
+}
+/* line 185, superscore.scss */
+#superscore .logo-alert {
+  width: 50px;
+}
+/* line 189, superscore.scss */
+#superscore .zero-padding td {
+  padding: 0;
+}
+/* line 194, superscore.scss */
+#superscore #settings .superscore-email {
+  margin-left: 22px;
+  margin-bottom: 8px;
+  display: list-item;
+}
+/* line 199, superscore.scss */
+#superscore #settings .superscore-email i.fa-envelope-o {
+  font-size: 14px;
+  color: #c45fff;
+  margin: 0px 5px;
+}
+/* line 204, superscore.scss */
+#superscore #settings .superscore-email i.fa-times {
+  color: #d9534f;
+}
+/* line 208, superscore.scss */
+#superscore #settings .superscore-email.removing {
+  color: #aaaaaa !important;
+}
+/* line 210, superscore.scss */
+#superscore #settings .superscore-email.removing * {
+  color: #aaaaaa !important;
+}
+/* line 218, superscore.scss */
+#superscore #kaleidoscope div[bubble-graph] svg {
+  height: 400px !important;
+}
+/* line 221, superscore.scss */
+#superscore #kaleidoscope div[bubble-graph] text {
+  font-size: 11px;
+  pointer-events: none;
+  transition: opacity ease .75s;
+}
+/* line 227, superscore.scss */
+#superscore #kaleidoscope div[bubble-graph] text.parent {
+  opacity: 0;
+}
+/* line 231, superscore.scss */
+#superscore #kaleidoscope div[bubble-graph] text.other {
+  opacity: 0;
+}
+/* line 235, superscore.scss */
+#superscore #kaleidoscope div[bubble-graph] circle {
+  fill-opacity: 1;
+  stroke: black;
+  pointer-events: all;
+  stroke-width: .5px;
+  transition: stroke-width stroke fill-opacity ease .75s;
+}
+/* line 243, superscore.scss */
+#superscore #kaleidoscope div[bubble-graph] circle.parent {
+  stroke-width: 3px;
+}
+/* line 247, superscore.scss */
+#superscore #kaleidoscope div[bubble-graph] circle.other {
+  fill-opacity: 0.2;
+  stroke: none;
+  pointer-events: none;
+}
+/* line 253, superscore.scss */
+#superscore #kaleidoscope div[bubble-graph] circle.subchild {
+  fill-opacity: 0;
+  stroke: none;
+  pointer-events: none;
+}
+/* line 259, superscore.scss */
+#superscore #kaleidoscope div[bubble-graph] circle.child:hover {
+  stroke-width: 2px;
+}
+/* line 263, superscore.scss */
+#superscore #kaleidoscope td.side-bar {
+  box-shadow: 0px 2px 14px #dadde0;
+}
+
+/* line 270, superscore.scss */
+.superscore-histogram svg {
+  overflow: visible;
+}
+/* line 273, superscore.scss */
+.superscore-histogram .nv-axis.nv-x .tick line {
+  display: none;
+}
+/* line 277, superscore.scss */
+.superscore-histogram .nvd3 text {
+  font-family: Lato, Arial, sans-serif;
+  font-weight: 400;
+  font-size: 12px;
+}
+/* line 282, superscore.scss */
+.superscore-histogram .nvd3 rect.discreteBar {
+  width: 15px;
+  transform: translateX(9px);
+}
+/* line 286, superscore.scss */
+.superscore-histogram .nvd3 .nv-axis .nv-axisMaxMin text {
+  font-weight: 400;
+}
+/* line 290, superscore.scss */
+.superscore-histogram .nvd3 .nv-y.nv-axis .tick:not(.zero) line {
+  stroke-dasharray: 3px;
+  fill: #d7d7d7;
+}
+/* line 294, superscore.scss */
+.superscore-histogram .nvd3 .nv-y.nv-axis path.domain {
+  display: none;
+}
+/* line 298, superscore.scss */
+.superscore-histogram .nvd3 .nv-groups .nv-point {
+  fill-opacity: 1;
+  stroke-opacity: 1;
+  fill: #FF0000;
+}
+/* line 303, superscore.scss */
+.superscore-histogram .nvd3 .nv-groups .nv-point.hover {
+  stroke-width: 2px;
+}
+
+/* line 309, superscore.scss */
+#new-section-here {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  background: white;
+  width: 300px;
+  padding: 10px 15px;
+  margin-left: 14px;
+  border: 1px solid #2a94eb;
+  border-radius: 5px;
+}
+
+/* line 320, superscore.scss */
+#new-section-here:before {
+  display: block;
+  content: ' ';
+  width: 20px;
+  height: 20px;
+  background: white;
+  position: absolute;
+  left: -10px;
+  top: calc(50% - 10px);
+  border: 1px solid #2a94eb;
+  transform: rotateZ(45deg);
+  z-index: -1;
+}
+
+/* line 333, superscore.scss */
+#new-section-here:after {
+  display: block;
+  content: ' ';
+  width: 2px;
+  height: 24px;
+  background: white;
+  position: absolute;
+  left: -1px;
+  top: calc(50% - 12px);
+  z-index: 0;
+}
+
+/* line 348, superscore.scss */
+.superscore-comments .ss-comments-table > thead > tr > th {
+  padding-bottom: 10px;
+}
+/* line 353, superscore.scss */
+.superscore-comments .ss-comments-table > tbody > tr > td {
+  padding: 8px 0px 5px 0px;
+  border-bottom: 1px solid #ddd;
+}
+/* line 357, superscore.scss */
+.superscore-comments .ss-comments-table > tbody > tr > td:first-child {
+  padding-left: 7px;
+  padding-right: 7px;
+}
+/* line 361, superscore.scss */
+.superscore-comments .ss-comments-table > tbody > tr:first-child > td {
+  border-top: 1px solid #ddd;
+}
+
+/* line 369, superscore.scss */
+.superscore-modal .modal-header {
+  background-color: #f9fbfd;
+  padding: 23px 28px;
+  border-top-right-radius: 6px;
+  border-top-left-radius: 6px;
+}
+/* line 374, superscore.scss */
+.superscore-modal .modal-header i.close-icon {
+  float: right;
+  font-size: 37px;
+  line-height: 25px;
+  color: #9ba2aa;
+}
+/* line 380, superscore.scss */
+.superscore-modal .modal-header h3 {
+  padding-left: 20px;
+  font-size: 18px;
+  font-weight: 700;
+  color: #202834;
+  text-transform: none;
+}
+/* line 388, superscore.scss */
+.superscore-modal .superscore-bar-first {
+  background-image: url('data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4gPHN2ZyB2ZXJzaW9uPSIxLjEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PGxpbmVhckdyYWRpZW50IGlkPSJncmFkIiBncmFkaWVudFVuaXRzPSJvYmplY3RCb3VuZGluZ0JveCIgeDE9IjAuNSIgeTE9IjAuMCIgeDI9IjAuNSIgeTI9IjEuMCI+PHN0b3Agb2Zmc2V0PSIwJSIgc3RvcC1jb2xvcj0iI2ZmMDAwMCIvPjxzdG9wIG9mZnNldD0iMTAwJSIgc3RvcC1jb2xvcj0iI2NjMDAwMCIvPjwvbGluZWFyR3JhZGllbnQ+PC9kZWZzPjxyZWN0IHg9IjAiIHk9IjAiIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JhZCkiIC8+PC9zdmc+IA==');
+  background-size: 100%;
+  background-image: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #ff0000), color-stop(100%, #cc0000));
+  background-image: -moz-linear-gradient(top, #ff0000, #cc0000);
+  background-image: -webkit-linear-gradient(top, #ff0000, #cc0000);
+  background-image: linear-gradient(to bottom, #ff0000, #cc0000);
+}
+/* line 391, superscore.scss */
+.superscore-modal .superscore-bar-second {
+  background-image: url('data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4gPHN2ZyB2ZXJzaW9uPSIxLjEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PGxpbmVhckdyYWRpZW50IGlkPSJncmFkIiBncmFkaWVudFVuaXRzPSJvYmplY3RCb3VuZGluZ0JveCIgeDE9IjAuNSIgeTE9IjAuMCIgeDI9IjAuNSIgeTI9IjEuMCI+PHN0b3Agb2Zmc2V0PSIwJSIgc3RvcC1jb2xvcj0iI2ZlMmU5NCIvPjxzdG9wIG9mZnNldD0iMTAwJSIgc3RvcC1jb2xvcj0iI2Y4MDE3YSIvPjwvbGluZWFyR3JhZGllbnQ+PC9kZWZzPjxyZWN0IHg9IjAiIHk9IjAiIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JhZCkiIC8+PC9zdmc+IA==');
+  background-size: 100%;
+  background-image: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #fe2e94), color-stop(100%, #f8017a));
+  background-image: -moz-linear-gradient(top, #fe2e94, #f8017a);
+  background-image: -webkit-linear-gradient(top, #fe2e94, #f8017a);
+  background-image: linear-gradient(to bottom, #fe2e94, #f8017a);
+}
+/* line 394, superscore.scss */
+.superscore-modal .superscore-bar-third {
+  background-image: url('data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4gPHN2ZyB2ZXJzaW9uPSIxLjEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PGxpbmVhckdyYWRpZW50IGlkPSJncmFkIiBncmFkaWVudFVuaXRzPSJvYmplY3RCb3VuZGluZ0JveCIgeDE9IjAuNSIgeTE9IjAuMCIgeDI9IjAuNSIgeTI9IjEuMCI+PHN0b3Agb2Zmc2V0PSIwJSIgc3RvcC1jb2xvcj0iIzM3OTRmZiIvPjxzdG9wIG9mZnNldD0iMTAwJSIgc3RvcC1jb2xvcj0iIzA0NzlmZiIvPjwvbGluZWFyR3JhZGllbnQ+PC9kZWZzPjxyZWN0IHg9IjAiIHk9IjAiIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JhZCkiIC8+PC9zdmc+IA==');
+  background-size: 100%;
+  background-image: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #3794ff), color-stop(100%, #0479ff));
+  background-image: -moz-linear-gradient(top, #3794ff, #0479ff);
+  background-image: -webkit-linear-gradient(top, #3794ff, #0479ff);
+  background-image: linear-gradient(to bottom, #3794ff, #0479ff);
+}
+/* line 397, superscore.scss */
+.superscore-modal .promoters, .superscore-modal .detractors {
+  position: relative;
+}
+/* line 400, superscore.scss */
+.superscore-modal .promoters .detail, .superscore-modal .detractors .detail {
+  position: absolute;
+  bottom: -15px;
+  font-size: 10px;
+  width: 100%;
+  left: 0;
+  font-size: 9px;
+  color: #777;
+}
+
+/* line 412, superscore.scss */
+.nps-evolution-tooltip tr:nth-child(1) .legend-color-guide div {
+  background: #3794ff !important;
+}
+/* line 415, superscore.scss */
+.nps-evolution-tooltip tr:nth-child(2) .legend-color-guide div {
+  background: #c45fff !important;
+}
+/* line 418, superscore.scss */
+.nps-evolution-tooltip tr:nth-child(3) .legend-color-guide div {
+  background: #FF0000 !important;
+}
+
+/* line 424, superscore.scss */
+.dashboard-superscore .button-and-title-align .dashboard-widget-title,
+.dashboard-superscore .dashboard-widget-title {
+  color: #384555;
+}
+
+/* line 430, superscore.scss */
+#period .dashboard-widget.button-and-title-align .dashboard-widget-title {
+  color: #384555;
+}
+
+/* line 434, superscore.scss */
+#superscore .period-filter {
+  margin-top: 12px;
+}
+
+/* line 438, superscore.scss */
+.period-filter {
+  display: table;
+  vertical-align: middle;
+}
+/* line 442, superscore.scss */
+.period-filter--label {
+  display: table-cell;
+  font-weight: 400;
+  width: 240px;
+}
+/* line 447, superscore.scss */
+.period-filter--label i {
+  font-size: 18px;
+  margin-right: 7px;
+  color: #3794ff;
+}
+/* line 454, superscore.scss */
+.period-filter--select {
+  display: table-cell;
+}
+/* line 459, superscore.scss */
+.period-filter--prev, .period-filter--next {
+  border: none;
+  margin: 0;
+  padding: 0;
+  width: auto;
+  overflow: visible;
+  background: transparent;
+  /* inherit font & color from ancestor */
+  color: inherit;
+  font: inherit;
+  /* Normalize `line-height`. Cannot be changed from `normal` in Firefox 4+. */
+  line-height: normal;
+  /* Corrects font smoothing for webkit */
+  -webkit-font-smoothing: inherit;
+  -moz-osx-font-smoothing: inherit;
+  /* Corrects inability to style clickable `input` types in iOS */
+  -webkit-appearance: none;
+  /* Remove excess padding and border in Firefox 4+ */
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+}
+/* line 98, ../../shared/_theme.mixins.scss */
+.period-filter--prev::-moz-focus-inner, .period-filter--next::-moz-focus-inner {
+  border: 0;
+  padding: 0;
+}
+/* line 464, superscore.scss */
+.period-filter--prev:focus, .period-filter--next:focus {
+  outline: none !important;
+}
+
+/* line 468, superscore.scss */
+.period-filter--prev span, .period-filter--next span {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-top: 2px solid #3794ff;
+  border-left: 2px solid #3794ff;
+}
+/* line 479, superscore.scss */
+.period-filter--prev span {
+  -moz-transform: rotate(-45deg);
+  -ms-transform: rotate(-45deg);
+  -webkit-transform: rotate(-45deg);
+  transform: rotate(-45deg);
+}
+/* line 483, superscore.scss */
+.period-filter--prev:focus span {
+  border-top: 3px solid #2F81E0;
+  border-left: 3px solid #2F81E0;
+}
+/* line 490, superscore.scss */
+.period-filter--next span {
+  -moz-transform: rotate(135deg);
+  -ms-transform: rotate(135deg);
+  -webkit-transform: rotate(135deg);
+  transform: rotate(135deg);
+}
+/* line 494, superscore.scss */
+.period-filter--next:focus span {
+  border-top: 3px solid #2F81E0;
+  border-left: 3px solid #2F81E0;
+}
+/* line 500, superscore.scss */
+.period-filter--current {
+  display: inline-block;
+  padding: 0 10px;
+}
+
+/* line 506, superscore.scss */
+#superscore .superscore-evolution svg, #evolution-graph svg {
+  overflow: visible;
+}
+/* line 509, superscore.scss */
+#superscore .superscore-evolution .nv-axis.nv-x .tick line, #evolution-graph .nv-axis.nv-x .tick line {
+  display: none;
+}
+/* line 513, superscore.scss */
+#superscore .superscore-evolution .nv-x text, #superscore .superscore-evolution .nv-y text, #evolution-graph .nv-x text, #evolution-graph .nv-y text {
+  fill: #777 !important;
+}
+/* line 517, superscore.scss */
+#superscore .superscore-evolution .nvd3.nv-line .nvd3.nv-scatter .nv-groups .nv-point, #evolution-graph .nvd3.nv-line .nvd3.nv-scatter .nv-groups .nv-point {
+  stroke-width: 2px;
+  stroke: #3794ff;
+}
+/* line 522, superscore.scss */
+#superscore .superscore-evolution .nvd3 text, #evolution-graph .nvd3 text {
+  font-family: Lato, Arial, sans-serif;
+  font-weight: 400;
+  font-size: 12px;
+}
+/* line 527, superscore.scss */
+#superscore .superscore-evolution .nvd3 .nv-axis .nv-axisMaxMin text, #evolution-graph .nvd3 .nv-axis .nv-axisMaxMin text {
+  font-weight: 400;
+}
+/* line 531, superscore.scss */
+#superscore .superscore-evolution .nvd3 .nv-y.nv-axis .tick.zero line, #evolution-graph .nvd3 .nv-y.nv-axis .tick.zero line {
+  stroke-dasharray: 3px;
+  fill: #d7d7d7;
+}
+/* line 535, superscore.scss */
+#superscore .superscore-evolution .nvd3 .nv-y.nv-axis path.domain, #evolution-graph .nvd3 .nv-y.nv-axis path.domain {
+  display: none;
+}
+/* line 539, superscore.scss */
+#superscore .superscore-evolution .nvd3 .nv-groups .nv-point, #evolution-graph .nvd3 .nv-groups .nv-point {
+  fill-opacity: 1;
+  fill: #ffffff;
+  stroke-opacity: 1;
+}
+/* line 544, superscore.scss */
+#superscore .superscore-evolution .nvd3 .nv-groups .nv-point.hover, #evolution-graph .nvd3 .nv-groups .nv-point.hover {
+  fill: none;
+}
+/* line 547, superscore.scss */
+#superscore .superscore-evolution .nvd3 .nv-point.selectedPulsing, #evolution-graph .nvd3 .nv-point.selectedPulsing {
+  stroke: #5F6D78;
+  stroke-width: 1px;
+  -moz-animation: pulseStroke 1.5s ease infinite;
+  -webkit-animation: pulseStroke 1.5s ease infinite;
+  animation: pulseStroke 1.5s ease infinite;
+}
+/* line 554, superscore.scss */
+#superscore .superscore-evolution .nvd3.nv-line > g[clip-path], #evolution-graph .nvd3.nv-line > g[clip-path] {
+  clip-path: none;
+}
+/* line 556, superscore.scss */
+#superscore .superscore-evolution .nvd3.nv-line > g[clip-path] > g[clip-path], #evolution-graph .nvd3.nv-line > g[clip-path] > g[clip-path] {
+  clip-path: none;
+}

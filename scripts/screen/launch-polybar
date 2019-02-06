@@ -1,0 +1,7 @@
+#!/bin/bash
+#Kill and launch polybar
+
+killall polybar
+
+MONITOR=HDMI-1 polybar -r dual_right &
+MONITOR=DP-1 polybar -r dual_left &

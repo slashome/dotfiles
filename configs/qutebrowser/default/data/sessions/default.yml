@@ -1,0 +1,21 @@
+windows:
+- geometry: !!binary |
+    AdnQywACAAAAAAAGAAADNQAAAS8AAAQxAAAABwAAAzYAAAEuAAAEMAAAAAEAAAAAB4A=
+  tabs:
+  - active: true
+    history:
+    - pinned: false
+      title: zeplin at DuckDuckGo
+      url: https://duckduckgo.com/?q=zeplin&ia=about
+    - original-url: https://duckduckgo.com/?q=zeplin&ia=about
+      pinned: false
+      title: Zeplin
+      url: https://zeplin.io/
+    - active: true
+      pinned: false
+      scroll-pos:
+        x: 0
+        y: 0
+      title: Zeplin - Login
+      url: https://app.zeplin.io/login
+      zoom: 0.9

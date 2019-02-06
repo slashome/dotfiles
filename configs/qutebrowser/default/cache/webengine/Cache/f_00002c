@@ -1,0 +1,402 @@
+(function () {
+  angular
+    .module('app.teams')
+    .service('UserAttributesService', UserAttributesService);
+
+  UserAttributesService.$inject = ['UserAttributesResource', 'EncodingService', '$filter', '$sce'];
+
+  function UserAttributesService(UserAttributesResource, EncodingService, $filter, $sce) {
+    this.getUserAttributesForHierarchy = getUserAttributesForHierarchy;
+    this.getCompanyUsedAttributes = getCompanyUsedAttributes;
+    this.getUserAttributesModels = getUserAttributesModels;
+    this.getNonSpecialModels = getNonSpecialModels;
+    this.getFilterableAttributes = getFilterableAttributes;
+    this.serializeValueForAttribute = serializeValueForAttribute;
+    this.parseValueForAttribute = parseValueForAttribute;
+    this.findCorrespondingKey = findCorrespondingKey;
+    this.ParsingError = ParsingError;
+    this.getAttributesColumns = getAttributesColumns;
+    this.getAttributeFilterObject = getAttributeFilterObject;
+    this.hiddenAttribute = hiddenAttribute;
+
+    /* ------------------ */
+
+    function getUserAttributesForHierarchy(companyId) {
+      return UserAttributesResource.getForHierarchies({ companyId: companyId }).$promise;
+    }
+
+    function getCompanyUsedAttributes(companyId) {
+      return UserAttributesResource.list({ companyId: companyId }).$promise;
+    }
+
+    function getUserAttributesModels(companyId) {
+      return UserAttributesResource.getModels({ companyId: companyId }).$promise.then(function (attrs) {
+        return _.map(attrs, function (attr) {
+          return { key: attr.key, type: attr.type }; // simple unpacker while we don't have a factory
+        });
+      });
+    }
+
+    function getNonSpecialModels(companyId) {
+      return UserAttributesResource.getNonSpecialModels({ companyId: companyId }).$promise.then(function (attrs) {
+        return _.map(attrs, function (attr) {
+          return { key: attr.key, type: attr.type }; // simple unpacker while we don't have a factory
+        });
+      });
+    }
+
+    function getFilterableAttributes(companyId) {
+      return UserAttributesResource.getFilterableAttributes({ companyId: companyId }).$promise.then(function (attributeKeys) {
+        return _.sortBy(attributeKeys, function (attrKey) {
+          return $filter('translateUserAttribute')(attrKey);
+        });
+      });
+    }
+
+    function serializeValueForAttribute(value, attributeKey) {
+      function dateSerializer(val) {
+        return moment(val).format('L');
+      }
+      var serializers = {
+        language: function (val) { return $filter('translate')(val); },
+        'userAttributes.startDate': dateSerializer,
+        'userAttributes.birthday': dateSerializer,
+        'userAttributes.canPraise': function (val) { return $filter('translate')(val ? 'Yes' : 'No'); },
+        'userAttributes.canBePraised': function (val) { return $filter('translate')(val ? 'Yes' : 'No'); },
+        'userAttributes.isActive': function (val) { return $filter('translate')(val ? 'Yes' : 'No'); },
+        'userAttributes.isManager': function (val) { return $filter('translate')(val ? 'Yes' : 'No'); },
+      };
+      if (serializers[attributeKey]) {
+        return serializers[attributeKey](value);
+      }
+      return value;
+    }
+
+    function ParsingError(error, value, acceptedValues) {
+      this.error = error;
+      this.value = value;
+      this.acceptedValues = acceptedValues;
+    }
+
+    /**
+     * @brief Filters a value depending on what kind of data is expected
+     * @details This will take a value and the given key, and convert it to the type expected by the
+     *          attribute that is concerned.
+     *
+     * @param {Any} value The value to filter
+     * @param {String} key The user attribute key that we want to analyze the value for
+     *
+     * @return {Any} The filtered value, if a conversion was needed.
+     */
+    function parseValueForAttribute(value, key) {
+      var trimmedValue = value;
+      if (typeof value === 'string') {
+        trimmedValue = value.trim();
+      }
+      // if the cell is empty, just send nothing
+      if (value === null || typeof value === 'undefined' || trimmedValue === '') {
+        return '';
+        // return value;
+      }
+      var dateParser = function (dateVal) {
+        if (typeof dateVal === 'number') {
+          return moment('1899-12-30 00:00:00').add(dateVal, 'days').format('YYYY-MM-DD');
+        }
+        if (typeof dateVal === 'string') {
+          var date = moment(dateVal);
+          if (date.isValid()) {
+            return date.format('YYYY-MM-DD');
+          }
+          date = moment(dateVal.replace(/^(\d{1,2})[\/-_](\d{1,2})[\/-_](\d{2,4})$/gi, '$3-$2-$1 12:00:00'));
+          if (date.isValid()) {
+            return date.format('YYYY-MM-DD');
+          }
+          date = moment(dateVal.replace(/^(\d{4})[\/-_](\d{1,2})[\/-_](\d{1,2})$/gi, '$1-$2-$3 12:00:00'));
+          if (date.isValid()) {
+            return date.format('YYYY-MM-DD');
+          }
+        }
+        throw new ParsingError('CANNOT_PARSE_DATE', dateVal);
+      };
+      var filters = {
+        'language': function (val) {
+          if (val.match(/(^fr|french|francais|français)/gi)) {
+            return 'fr_FR';
+          } else if (val.match(/(^en|english|anglais)/gi)) {
+            return 'en_US';
+          } else if (val.match(/(^zh|chinese)/gi)) {
+            return 'zh_GMC';
+          } else if (val.match(/(^cs|czech)/gi)) {
+            return 'cs_GMC';
+          } else if (val.match(/(^de|german|deutsch)/gi)) {
+            return 'de_DE';
+          } else if (val.match(/(^hu|hungarian)/gi)) {
+            return 'hu_HU';
+          } else if (val.match(/(^nl|dutch)/gi)) {
+            return 'nl_NL';
+          } else if (val.match(/(^it|italian)/gi)) {
+            return 'it_IT';
+          } else if (val.match(/(^pt|portuguese)/gi)) {
+            return 'pt_PT';
+          } else if (val.match(/(^es|spanish)/gi)) {
+            return 'es_ES';
+          } else if (val.match(/(^ru|russian)/gi)) {
+            return 'ru_RU';
+          } else if (val.match(/(^ja|japanese)/gi)) {
+            return 'ja_JA';
+          }
+          throw new ParsingError('CANNOT_PARSE_LANGUAGE', val, ['french', 'english', 'chinese', 'czech', 'german', 'hungarian', 'dutch', 'italian', 'portuguese', 'spanish', 'russian', 'japanese']);
+        },
+        'userAttributes.isActive':  function (val) { return typeof val === 'string' ? (val.match(/(true|yes|1|oui|ok)/gi) !== null) : Boolean(val); },
+        'userAttributes.isManager': function (val) { return typeof val === 'string' ? (val.match(/(true|yes|1|oui|ok)/gi) !== null) : Boolean(val); },
+        'userAttributes.expatriate': function (val) { return typeof val === 'string' ? (val.match(/(true|yes|1|oui|ok)/gi) !== null) : Boolean(val); },
+        'userAttributes.gender':    function (val) {
+          return val.match(/(w|f)/gi) !== null ? 'gt_female' : 'gt_male';
+        }, // woman / female contain 'f' or 'w' and male / homme / H / M do not
+        'userAttributes.startDate': dateParser,
+        'userAttributes.birthday':  dateParser,
+      };
+      if (filters[key]) {
+        return filters[key](trimmedValue);
+      }
+      return trimmedValue;
+    }
+
+    /**
+     * @brief Tries to parse a string and return the corresponding key corresponding to a user's attribute
+     * @details This will use regexes to find which attribute corresponds to the given text, whatever the language
+     *
+     * @param  {String} text The value to analyse
+     * @return {String} The corresponding key if found, NULL if the key is not found.
+     */
+    function findCorrespondingKey(text) {
+      var matchers = {
+        'email':                         /(mail|couriel|courrier)/gi,
+        'firstName':                     /(prenom|first\s*name|surname)/gi,
+        'lastName':                      /(nom|last\s*name|name)/gi,
+        'language':                      /(language|langue|lang)/gi,
+        'userAttributes.role':           /(role)/gi,
+        'userAttributes.subregion':      /((sub|sous)[-_\s]*region)/gi,
+        'userAttributes.status':         /((legal|professional)\s*status|statut\s*(legal|pro))/gi,
+        'userAttributes.department':     /(department|departement)/gi,
+        'userAttributes.region':         /(region)/gi,
+        'userAttributes.country':        /(country|pays)/gi,
+        'userAttributes.location2':      /(location2)/gi,
+        'userAttributes.location':       /(location|lieu|endroit|place)/gi,
+        'userAttributes.entity':         /(entity|entite)/gi,
+        'userAttributes.firstTeam':      /((?:first|primary)\s*team|team\s1|premiere\s*equipe|equipe\s*(?:principale|1))/gi,
+        'userAttributes.secondTeam':     /((?:second|secondary|alternate|alternative|other)\s*team|team\s*2|(?:second|deuxieme|autre)\s*equipe|equipe\s*(?:alternative|secondaire|autre|2))/gi,
+        'userAttributes.contract':       /(contract|contract\s*type|contrat|type\s*de\s*contrat)/gi,
+        'userAttributes.education':      /(education|apprentissage|formation|curriculum)/gi,
+        'userAttributes.isActive':       /(active|actif|is\s*active|est\s*actif)/gi,
+        'userAttributes.isManager':      /(manager|est\s*manager|is\s*manager)/gi,
+        'userAttributes.startDate':      /((?:start|beginning|coming|begin|entry)\s*date|date\s*(?:de\s*debut|d'\s*arrivee|de\s*demarrage|d'\s*entree|d'\s*embauche))/gi,
+        'userAttributes.gender':         /(gender|sex|genre)/gi,
+        'userAttributes.birthday':       /(date\s*de\s*naissance|ddn|birthday|birth\s*(day|date))/gi,
+        'userAttributes.employeeNumber': /((emp|employee)\s*(number|#)|employe\s*(numero|n°|#)|(numero|n°|#)\s*employe)/gi,
+        'userAttributes.jobTitle':       /(job\s*title)|(intitule(.*)poste)|(titre(.*)poste)/gi,
+        'userAttributes.globalRights':   /globalRights1|configuration\s*des\s*droits\s*\(?1\)|rights\s*configuration\s*\(?1\)?/gi,
+        'userAttributes.globalRights2':  /globalRights2|configuration\s*des\s*droits\s*\(?2\)|rights\s*configuration\s*\(?2\)?/gi,
+        'userAttributes.globalRights3':  /globalRights3|configuration\s*des\s*droits\s*\(?3\)|rights\s*configuration\s*\(?3\)?/gi,
+        'userAttributes.nPlus1':         /(n\s*\+\s*1)|((?:first|primary)\s*manager|manager\s*(principal|1))/gi,
+        'userAttributes.nPlus2':         /(n\s*\+\s*2)|((?:second|secondary|alternate|alternative|other)\s*manager|(?:second|deuxieme|autre)\s*manager|manager\s*(?:alternatif|secondaire|autre|2))/gi,
+        'userAttributes.nPlus3':         /n\s*\+\s*3/gi,
+        'userAttributes.nPlus4':         /n\s*\+\s*4/gi,
+        'userAttributes.nPlus5':         /n\s*\+\s*5/gi,
+        'userAttributes.nPlus6':         /n\s*\+\s*6/gi,
+        'userAttributes.nPlus7':         /n\s*\+\s*7/gi,
+        'userAttributes.tier1':          /(tier|hierarch)\s*1/gi,
+        'userAttributes.tier2':          /(tier|hierarch)\s*2/gi,
+        'userAttributes.tier3':          /(tier|hierarch)\s*3/gi,
+        'userAttributes.tier4':          /(tier|hierarch)\s*4/gi,
+        'userAttributes.tier5':          /(tier|hierarch)\s*5/gi,
+        'userAttributes.tier6':          /(tier|hierarch)\s*6/gi,
+        'userAttributes.tier7':          /(tier|hierarch)\s*7/gi,
+        'userAttributes.grade':          /(grade)/gi,
+        'userAttributes.expatriate':     /(expatriate|expatrie)/gi,
+        'userAttributes.talent':         /(talent)/gi,
+      };
+      var neatValue = EncodingService.asciiString(text.toLowerCase());
+      var attributeKey = _.findKey(matchers, function (matcher) {
+        return neatValue.match(matcher) !== null;
+      });
+      return attributeKey;
+    }
+
+    function getAttributesColumns() {
+      return [{
+        label: 'atau_role',
+        displayed: true,
+        sortKey: 'userAttributes.role',
+        userAttributeKey: 'role',
+        iconClass: 'si si-mustache-2',
+        value: function (user) { return user.userAttributes.role; },
+      }, {
+        label: 'atau_email',
+        displayed: true,
+        sortKey: 'email',
+        iconClass: 'si si-email',
+        value: function (user) { return user.email; },
+      }, {
+        label: 'atau_region',
+        displayed: false,
+        sortKey: 'userAttributes.region',
+        userAttributeKey: 'region',
+        iconClass: 'si si-world',
+        value: function (user) { return user.userAttributes.region; },
+      }, {
+        label: 'atau_subregion',
+        displayed: false,
+        sortKey: 'userAttributes.subregion',
+        userAttributeKey: 'subregion',
+        iconClass: 'si si-world',
+        value: function (user) { return user.userAttributes.subregion; },
+      }, {
+        label: 'atau_country',
+        displayed: false,
+        sortKey: 'userAttributes.country',
+        userAttributeKey: 'country',
+        iconClass: 'si si-globe',
+        value: function (user) { return user.userAttributes.country; },
+      }, {
+        label: 'atau_location',
+        displayed: false,
+        sortKey: 'userAttributes.location',
+        userAttributeKey: 'location',
+        iconClass: 'si si-location-pin',
+        value: function (user) { return user.userAttributes.location; },
+      }, {
+        label: 'atau_language',
+        displayed: false,
+        sortKey: 'language',
+        iconClass: 'si si-chat-bubble',
+        value: function (user) { return $filter('translate')(user.language); },
+      }, {
+        label: 'atau_entity',
+        displayed: true,
+        sortKey: 'userAttributes.entity',
+        userAttributeKey: 'entity',
+        iconClass: 'si si-diagram',
+        value: function (user) { return user.userAttributes.entity; },
+      }, {
+        label: 'atau_firstTeam',
+        displayed: true,
+        sortKey: 'userAttributes.firstTeam',
+        userAttributeKey: 'firstTeam',
+        iconClass: 'si si-team',
+        value: function (user) { return user.userAttributes.firstTeam; },
+      }, {
+        label: 'atau_secondTeam',
+        displayed: false,
+        sortKey: 'userAttributes.secondTeam',
+        userAttributeKey: 'secondTeam',
+        iconClass: 'si si-team',
+        value: function (user) { return user.userAttributes.secondTeam; },
+      }, {
+        label: 'atau_firstManager',
+        displayed: false,
+        sortKey: 'userAttributes.nPlus1',
+        userAttributeKey: 'nPlus1',
+        iconClass: 'si si-wallet',
+        value: function (user) { return user.userAttributes.nPlus1; },
+      }, {
+        label: 'atau_secondManager',
+        displayed: false,
+        sortKey: 'userAttributes.nPlus2',
+        userAttributeKey: 'nPlus2',
+        iconClass: 'si si-wallet',
+        value: function (user) { return user.userAttributes.nPlus2; },
+      }, {
+        label: 'atau_startDate',
+        displayed: false,
+        sortKey: 'userAttributes.startDate',
+        userAttributeKey: 'startDate',
+        iconClass: 'si si-calendar',
+        value: function (user) { return $filter('moment')(user.userAttributes.startDate, 'L'); },
+      }, {
+        label: 'atau_contract',
+        displayed: false,
+        sortKey: 'userAttributes.contract',
+        userAttributeKey: 'contract',
+        iconClass: 'si si-chat-bubble',
+        value: function (user) { return user.userAttributes.contract; },
+      }, {
+        label: 'atau_education',
+        displayed: false,
+        sortKey: 'userAttributes.education',
+        userAttributeKey: 'education',
+        iconClass: 'si si-education',
+        value: function (user) { return user.userAttributes.education; },
+      }, {
+        label: 'atau_gender',
+        displayed: false,
+        sortKey: 'userAttributes.gender',
+        userAttributeKey: 'gender',
+        iconClass: 'si si-gender',
+        value: function (user) { return $filter('translate')(user.userAttributes.gender); },
+      }, {
+        label: 'atau_birthday',
+        displayed: false,
+        sortKey: 'userAttributes.birthday',
+        userAttributeKey: 'birthday',
+        iconClass: 'si si-birthday-cake',
+        value: function (user) { return $filter('moment')(user.userAttributes.birthday, 'L'); },
+      }, {
+        label: 'atau_employeeNumber',
+        displayed: false,
+        sortKey: 'userAttributes.employeeNumber',
+        userAttributeKey: 'employeeNumber',
+        iconClass: 'si si-soccer-t-shirt',
+        value: function (user) { return $filter('translate')(user.userAttributes.employeeNumber); },
+      }, {
+        label: 'atau_isManager',
+        displayed: false,
+        sortKey: 'userAttributes.isManager',
+        userAttributeKey: 'isManager',
+        iconClass: 'si si-wallet',
+        value: function (user) { return $filter('translate')(user.userAttributes.isManager ? 'uav_yes' : 'uav_no'); },
+      }, {
+        label: 'atau_isActive',
+        displayed: true,
+        bindHtml: true,
+        textAlignment: 'center',
+        sortKey: 'userAttributes.isActive',
+        userAttributeKey: 'isActive',
+        iconClass: 'si si-lightning',
+        value: function (user) { return $sce.trustAsHtml(user.userAttributes.isActive ? '<i class="fa fa-check"></i>' : '<i class="fa fa-times"></i>'); },
+      }, {
+        label: 'atau_rights',
+        displayed: false,
+        sortKey: 'userType',
+        iconClass: 'si si-lock-open',
+        value: function (user) { return $filter('translate')('ut_' + user.userType.toLowerCase()); },
+      }];
+    }
+
+    function getAttributeFilterObject(attributeKey, icon) {
+      var foundAttribute = _.find(getAttributesColumns(), function (columnConfiguration) {
+        return columnConfiguration.userAttributeKey === attributeKey;
+      });
+      if (foundAttribute) {
+        return foundAttribute;
+      }
+      return {
+        label: 'atau_' + attributeKey,
+        displayed: false,
+        sortKey: 'userAttributes.' + attributeKey,
+        userAttributeKey: attributeKey,
+        iconClass: icon || 'si si-user',
+        value: function (user) { return user.userAttributes[attributeKey]; },
+      };
+    }
+
+    function hiddenAttribute(attributeKey) {
+      return !(!{
+        teamId: true,
+        canPraise: true,
+        canBePraised: true,
+        hierarchyKey: true,
+      }[attributeKey]);
+    }
+  }
+})();

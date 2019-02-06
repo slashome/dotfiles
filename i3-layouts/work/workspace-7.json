@@ -1,0 +1,23 @@
+// vim:ts=4:sw=4:et
+{
+    "border": "pixel",
+    "current_border_width": 1,
+    "floating": "auto_off",
+    "geometry": {
+       "height": 1034,
+       "width": 949,
+       "x": 964,
+       "y": 39
+    },
+    "name": "i3: Layout saving in i3 - qutebrowser",
+    "percent": 1,
+    "swallows": [
+       {
+       // "class": "^qutebrowser$",
+       // "instance": "^qutebrowser$",
+       // "title": "^i3\\:\\ Layout\\ saving\\ in\\ i3\\ \\-\\ qutebrowser$"
+       }
+    ],
+    "type": "con"
+}
+

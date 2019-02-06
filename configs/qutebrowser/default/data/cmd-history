@@ -1,0 +1,17 @@
+:open qute://config
+:open qute:
+:set content.notifications true
+:open localhost:8080/app
+:set
+/cache
+:open -t boursorama nombre tentative
+:open -t !lfm devildriver
+:open -t pipe waiting for dom to be loaded angular2
+:open -t !lfm mano solo
+:open -t !lfm communion
+:open septicflesh lastfm
+:open http://localhost:8080/app
+:open -t laura jane grace
+:open google.com
+:open https://accounts.google.com
+:open -t zeplin

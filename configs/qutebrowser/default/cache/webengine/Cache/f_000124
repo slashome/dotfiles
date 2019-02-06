@@ -1,0 +1,507 @@
+(function () {
+  angular
+    .module('app.campaigns.pulse')
+    .controller('app.campaigns.pulse.EditCampaignController', EditCampaignController);
+
+  EditCampaignController.$inject = ['company', 'CampaignsService', '$stateParams', 'Categories', 'User', 'Survey', '$scope', '$q', 'ErrorReporter', 'CompanyQuestionsResource', 'QuestionModel', 'SurveyService', 'ngToast', '$filter', '$timeout', 'Question', '$modal'];
+
+  function EditCampaignController(company, CampaignsService, $stateParams, Categories, User, Survey, $scope, $q, ErrorReporter, CompanyQuestionsResource, QuestionModel, SurveyService, ngToast, $filter, $timeout, Question, $modal) {
+    var vm = this;
+    var campaignId = parseInt($stateParams.campaignId, 10);
+    vm.surveys = [];
+    vm.categories = Categories;
+    vm.languages = company.languages;
+    vm.selectedLanguage = vm.languages.indexOf(User.language) >= 0 ? User.language : vm.languages[0];
+    vm.panelOpened = false;
+    vm.savingSurvey = false;
+    vm.editedSurvey = null;
+    vm.originalSurvey = null;
+    vm.generateSurvey = generateSurvey;
+    vm.removeQuestion = removeQuestion;
+    vm.deleteSurvey = deleteSurvey;
+    vm.cancelEdition = cancelEdition;
+    vm.startSurveyEdition = startSurveyEdition;
+    vm.startQuestionEdition = startQuestionEdition;
+    vm.translations = null;
+    vm.hasSelectedQuestionForReplacement = false;
+    vm.companyQuestions = null;
+    vm.companyQuestionsCategory = null;
+    vm.hasChangedEditedSurvey = false;
+    vm.setCompanyQuestionsCategory = setCompanyQuestionsCategory;
+    vm.replaceSelectedQuestion = replaceSelectedQuestion;
+    vm.resetEditedQuestion = resetEditedQuestion;
+    vm.saveSurvey = saveSurvey;
+    vm.saveTranslations = saveTranslations;
+    vm.maxQuestionsPerSurvey = 15;
+    vm.createNewCustomQuestion = createNewCustomQuestion;
+    vm.removeCustomQuestion = removeCustomQuestion;
+    vm.editCustomQuestion = editCustomQuestion;
+    vm.questionUnsupportedLanguages = CampaignsService.questionUnsupportedLanguages;
+    vm.changedTitleOrDescription = function () { vm.hasChangedEditedSurvey = true; };
+    vm.updateAutoGeneration = function () {
+      if (vm.campaign.continueGeneration) {
+        return CampaignsService.startSurveyGeneration(vm.campaign);
+      }
+      return CampaignsService.stopSurveyGeneration(vm.campaign);
+    };
+    var cancelTimeout = null;
+    // loadCustomQuestions();
+    loadCampaign();
+
+    $scope.$on('$destroy', function () {
+      closeEditionPanel();
+      angular.element('#app-content').css('transition', 'margin-right 0s');
+    });
+
+    angular.element('#app-content').css('transition', 'margin-right 1s ease');
+    angular.element('#app-content').scrollTop(0);
+
+    /* ----------------------------- */
+
+    function loadCampaign() {
+      vm.loading = true;
+      CampaignsService.getCampaign(company.id, campaignId).then(function (campaign) {
+        vm.campaign = campaign;
+        CampaignsService.getCampaignStatistics(vm.campaign).then(function () {
+          vm.languages = company.languages;
+          if (typeof vm.campaign.statistics !== 'undefined'
+              && typeof vm.campaign.statistics.languagesUsed !== 'undefined'
+              && vm.campaign.statistics.languagesUsed.length > 0
+          ) {
+            vm.languages = vm.campaign.statistics.languagesUsed;
+          }
+          if (vm.languages.indexOf(User.language) === -1) {
+            vm.languages.splice(0, 0, User.language);
+          }
+          vm.selectedLanguage = vm.languages.indexOf(User.language) >= 0 ? User.language : vm.languages[0];
+        });
+        loadCompanyQuestions();
+        loadCampaignSurveys().finally(function () {
+          vm.loading = false;
+        });
+      }, function () {
+        vm.loading = false;
+      });
+    }
+
+    function loadCampaignSurveys() {
+      return CampaignsService.loadCampaignSurveys(vm.campaign).then(function () {
+        vm.surveys = vm.campaign.futureSurveys;
+        setSurveysQuestionsCategories();
+        dragAndDrop();
+      });
+    }
+
+    function generateSurvey() {
+      var promise = CampaignsService.generate(company.id, campaignId).then(function () {
+        vm.loading = true;
+        return loadCampaignSurveys();
+      });
+      promise.finally(function () {
+        vm.loading = false;
+      });
+      return promise;
+    }
+
+    function removeQuestion(survey, questionId) {
+      SurveyService.removeQuestion(survey, questionId).then(function () {
+        setSurveyQuestionsCategories(survey);
+      }, function (error) {
+        ErrorReporter.reportError(error);
+      });
+    }
+
+    function deleteSurvey(surveyId) {
+      var modalOptions = {
+        title: $filter('translate')('se_deleteSurveyConfirmTitle'),
+        body:  $filter('translate')('se_deleteSurveyConfirmText'),
+        cancel: true,
+        cancelClass: 'btn btn-danger',
+        cancelText: 'no',
+        confirm: true,
+        confirmClass: 'btn btn-default',
+        confirmText: 'yes',
+      };
+
+      var modal = $modal.open({
+        templateUrl: '/app/shared/elements/confirmationModal.html',
+        controller: 'shared.elements.ConfirmationModalController',
+        controllerAs: 'cmCtrl',
+        windowClass: 'v2',
+        size: 'sm',
+        resolve: {
+          options: modalOptions,
+        },
+      });
+      var deferred = $q.defer();
+      modal.result.then(function () {
+        vm.loading = true;
+        superAnalytics.track('CampaignFeatures', {
+          name:       'Survey edition',
+          action:     'Delete a survey',
+          companyId:  company.id,
+          campaignId: campaignId,
+        });
+        CampaignsService.deleteSurvey(company.id, campaignId, surveyId).then(function (campaign) {
+          vm.campaign.apply(campaign);
+          vm.loading = false;
+          deferred.resolve(loadCampaignSurveys());
+        }, function (error) {
+          vm.loading = false;
+          deferred.reject(error);
+        });
+      }).catch(function () {
+        deferred.resolve();
+      });
+      return deferred.promise;
+    }
+
+    function startSurveyEdition(survey) {
+      if (vm.editedSurvey && vm.hasChangedEditedSurvey) {
+        ngToast.create({
+          className: 'danger',
+          content: $filter('translate')('se_cancelOrSave'),
+        });
+        return;
+      }
+      superAnalytics.track('CampaignFeatures', {
+        name:       'Survey edition',
+        action:     'Click on the edit icon for a survey',
+        companyId:  company.id,
+        campaignId: campaignId,
+      });
+      vm.hasChangedEditedSurvey = false;
+      vm.originalSurvey = survey;
+      vm.editedSurvey = new Survey(survey);
+      vm.editionMode = 'survey';
+      openEditionPanel();
+    }
+    function startQuestionEdition(survey, question) {
+      if (vm.editedSurvey && vm.hasChangedEditedSurvey) {
+        ngToast.create({
+          className: 'danger',
+          content: $filter('translate')('se_cancelOrSave'),
+        });
+        return;
+      }
+      superAnalytics.track('CampaignFeatures', {
+        name:          'Survey edition',
+        action:        question ? 'Click on the question to edit it' : 'Add a question',
+        companyId:     company.id,
+        campaignId:    campaignId,
+        questionType:  question ? question.questionType : null,
+        questionModel: question ? question.questionModelId : null,
+      });
+      vm.hasChangedEditedSurvey = false;
+      vm.originalSurvey = survey;
+      vm.editedSurvey = new Survey(survey);
+      vm.editionMode = 'question';
+      vm.originalQuestion = question;
+      vm.originalQuestionIndex = _.indexOf(survey.questions, question);
+      vm.editedQuestion = question ? new Question(question) : null;
+      setCompanyQuestionsCategory(question ? question.category : vm.categories[0]);
+      openEditionPanel();
+    }
+    function cancelEdition() {
+      cancelTimeout = $timeout(function () {
+        vm.editedSurvey = null;
+        vm.originalSurvey = null;
+        vm.hasSelectedQuestionForReplacement = false;
+        vm.hasChangedEditedSurvey = false;
+        vm.editionMode = null;
+      }, 1000);
+      closeEditionPanel();
+    }
+
+    function openEditionPanel() {
+      if (cancelTimeout) { $timeout.cancel(cancelTimeout); }
+      $('#app-content').addClass('panel-opened-right');
+      vm.panelOpened = true;
+    }
+    function closeEditionPanel() {
+      $('#app-content').removeClass('panel-opened-right');
+      vm.panelOpened = false;
+    }
+
+    function findCategoryById(categoryId) {
+      return  _.find(Categories, function (category) { return category.id === categoryId; });
+    }
+
+    var firstLoad = true;
+    function loadCompanyQuestions() {
+      if (!vm.companyQuestions) {
+        CompanyQuestionsResource.list({ companyId: company.id, campaignId: vm.campaign.id })
+          .$promise
+          .then(function (questionModels) {
+            vm.companyQuestions = QuestionModel.parseArray(questionModels);
+            for (var i = 0; i < vm.companyQuestions.length; i++) {
+              var questionModel = vm.companyQuestions[i];
+              questionModel.category = findCategoryById(questionModel.categoryId);
+            }
+            if (firstLoad && !vm.displayRecurringQuestionsPanel) {
+              vm.tipToShow = 0;
+            }
+            firstLoad = false;
+
+            vm.customQuestions = _.filter(vm.companyQuestions, function (question) {
+              return question.companyId > 0;
+            });
+          });
+      }
+    }
+
+    function setSurveyQuestionsCategories(survey) {
+      for (var i = 0; i < survey.questions.length; i++) {
+        var question = survey.questions[i];
+        question.category = findCategoryById(question.categoryId);
+      }
+    }
+    function setSurveysQuestionsCategories() {
+      for (var i = 0; i < vm.surveys.length; i++) {
+        setSurveyQuestionsCategories(vm.surveys[i]);
+      }
+    }
+
+    function setCompanyQuestionsCategory(category) {
+      vm.companyQuestionsCategory = category;
+    }
+
+    function replaceSelectedQuestion(newQuestion) {
+      vm.hasChangedEditedSurvey = true;
+      if (!vm.editedQuestion) {
+        vm.editedQuestion = new Question();
+        vm.editedQuestion.applyModel(newQuestion);
+        return;
+      }
+      $timeout(function () {
+        vm.editedQuestion.applyModel(newQuestion);
+      }, 250);
+      makeQuestionBlink();
+    }
+
+    function resetEditedQuestion() {
+      vm.hasChangedEditedSurvey = false;
+      $timeout(function () {
+        vm.editedQuestion = vm.originalQuestion ? new Question(vm.originalQuestion) : null;
+      }, 250);
+      makeQuestionBlink();
+    }
+
+    function makeQuestionBlink() {
+      // var questionIndex = _.indexOf(vm.editedSurvey.questions, vm.editedQuestion);
+      angular.element('#question-edition .survey-question:eq(0)').addClass('blink');
+      $timeout(function () {
+        angular.element('#question-edition .survey-question:eq(0)').removeClass('blink');
+      }, 250);
+    }
+
+    function saveSurvey() {
+      if (vm.editionMode === 'survey') {
+        saveTranslations();
+        return;
+      }
+      if (!vm.hasChangedEditedSurvey) {
+        ngToast.create($filter('translate')('se_savedSurvey'));
+        return;
+      }
+      var l = $('#save-survey').ladda();
+      l.ladda('start');
+      vm.savingSurvey = true;
+      if (vm.originalQuestionIndex === -1) {
+        vm.editedSurvey.questions.push(vm.editedQuestion);
+      } else {
+        vm.editedSurvey.questions.splice(vm.originalQuestionIndex, 1, vm.editedQuestion);
+      }
+      SurveyService.saveSurvey(vm.editedSurvey).then(function (survey) {
+        setSurveyQuestionsCategories(survey);
+        vm.originalSurvey.apply(survey);
+        vm.savingSurvey = false;
+        vm.hasChangedEditedSurvey = false;
+        if (vm.originalQuestionIndex === -1) {
+          vm.originalQuestion = vm.originalSurvey.questions[vm.originalSurvey.questions.length - 1];
+          vm.originalQuestionIndex = survey.questions.length - 1;
+        } else {
+          vm.originalQuestion = vm.originalSurvey.questions[vm.originalQuestionIndex];
+        }
+        vm.editedQuestion = new Question(vm.editedQuestion);
+        ngToast.create($filter('translate')('se_savedSurvey'));
+        l.ladda('stop');
+      }, function (error) {
+        vm.savingSurvey = false;
+        ngToast.create({
+          content: $filter('translate')(error.data.error),
+          className: 'danger',
+        });
+        l.ladda('stop');
+      });
+    }
+
+    function saveTranslations() {
+      if (!vm.hasChangedEditedSurvey) {
+        ngToast.create($filter('translate')('se_savedSurvey'));
+        return;
+      }
+      var l = $('#save-survey').ladda();
+      l.ladda('start');
+      vm.savingSurvey = true;
+      SurveyService.saveSurveyTranslations(vm.editedSurvey).then(function (survey) {
+        vm.originalSurvey.apply(survey);
+        vm.savingSurvey = false;
+        vm.hasChangedEditedSurvey = false;
+        ngToast.create($filter('translate')('se_savedSurvey'));
+        $scope.surveyMetadata.$setPristine();
+        l.ladda('stop');
+      }, function (error) {
+        vm.savingSurvey = false;
+        ngToast.create({
+          content: $filter('translate')(error.data.error),
+          className: 'danger',
+        });
+        l.ladda('stop');
+      });
+    }
+
+    function createNewCustomQuestion() {
+      superAnalytics.track('CampaignFeatures', {
+        name:   'Custom question',
+        action: 'Click on new question button',
+        companyId: company.id,
+      });
+      var modalInstance = $modal.open({
+        templateUrl: '/app/app/surveys/new-custom-question-modal.html',
+        controller: 'app.surveys.NewCustomQuestionModalController',
+        controllerAs: 'ncqm',
+        windowClass: 'v2 nofade new-custom-question-modal',
+        backdrop: 'static',
+        size: 'lg',
+        resolve: {
+          company: function () { return company; },
+          question: function () { return null; },
+          questionSetId: vm.campaign.questionSetId,
+        },
+      });
+      modalInstance.result.then(function (newQuestionModel) {
+        newQuestionModel.category = findCategoryById(newQuestionModel.categoryId);
+        vm.companyQuestions.push(newQuestionModel);
+        vm.customQuestions.push(newQuestionModel);
+        setCompanyQuestionsCategory(newQuestionModel.category);
+        ngToast.create($filter('translate')('se_savedNewQuestion'));
+        replaceSelectedQuestion(newQuestionModel);
+      });
+    }
+
+    function editCustomQuestion(question) {
+      superAnalytics.track('CampaignFeatures', {
+        name:   'Custom question',
+        action: 'Click on custom question button',
+        companyId: company.id,
+      });
+      var modalInstance = $modal.open({
+        templateUrl: '/app/app/surveys/new-custom-question-modal.html',
+        controller: 'app.surveys.NewCustomQuestionModalController',
+        controllerAs: 'ncqm',
+        windowClass: 'v2 nofade new-custom-question-modal',
+        backdrop: 'static',
+        size: 'lg',
+        resolve: {
+          company: function () { return company; },
+          question: function () { return question; },
+          questionSetId: vm.campaign.questionSetId,
+        },
+      });
+      modalInstance.result.then(function (newQuestionModel) {
+        question.apply(newQuestionModel);
+        question.category = findCategoryById(question.categoryId);
+        ngToast.create($filter('translate')('se_savedEditedQuestion'));
+      });
+    }
+
+    function removeCustomQuestion(question) {
+      question.removing = true;
+      CampaignsService.removeQuestionFromSet(company.id, campaignId, question.id).then(function () {
+        question.removing = false;
+        var idx = _.findIndex(vm.customQuestions, function (questionModel) {
+          return parseInt(questionModel.id, 10) === parseInt(question.id, 10);
+        });
+        if (idx >= 0) {
+          vm.customQuestions.splice(idx, 1);
+        }
+      }, function (error) {
+        question.removing = false;
+        ErrorReporter.reportError(error);
+      });
+    }
+
+    function dragAndDrop() {
+      if (vm.dragula) {
+        vm.dragula.destroy();
+      }
+      setTimeout(function () {
+        vm.dragula = window.dragula(Array.prototype.slice.call(document.getElementsByClassName('survey-actual-questions')), {
+          moves: function (el, source, handle) {
+            return handle.classList.contains('drag-handle');
+          },
+        });
+        vm.dragula.on('drop', function (el, target, source, sibling) {
+          superAnalytics.track('CampaignFeatures', {
+            name:       'Survey edition',
+            action:     'Dragged, and dropped a question',
+            companyId:  company.id,
+            campaignId: campaignId,
+          });
+
+          var sourceSurveyId = $(source).attr('dragula-survey-id');
+          var destSurveyId = $(target).attr('dragula-survey-id');
+          var questionId = $(el).attr('dragula-question-id');
+          var insertedBeforeQuestionId = $(sibling).attr('dragula-question-id');
+          var insertPos = 0;
+
+          var findById = function (expectedId) { return function (collectionElement) { return parseInt(collectionElement.id, 10) === parseInt(expectedId, 10); }; };
+          var sourceSurvey = _.find(vm.surveys, findById(sourceSurveyId));
+          var destSurvey = _.find(vm.surveys, findById(destSurveyId));
+          var movedQuestion = _.find(sourceSurvey.questions, findById(questionId));
+          if (sourceSurvey !== destSurvey) {
+            // remove question from old survey, create in new one and insert at right pos
+            if (!insertedBeforeQuestionId) {
+              destSurvey.questions.push(movedQuestion);
+            } else {
+              insertPos = _.findIndex(destSurvey.questions, findById(insertedBeforeQuestionId));
+              destSurvey.questions.splice(insertPos, 0, movedQuestion);
+            }
+
+            vm.savingSurveys = true;
+            var firstPromise = SurveyService.removeQuestion(sourceSurvey, questionId).then(function () {
+              setSurveyQuestionsCategories(sourceSurvey);
+            });
+            var secondPromise = SurveyService.saveSurvey(destSurvey).then(function (survey) {
+              setSurveyQuestionsCategories(survey);
+              destSurvey.apply(survey);
+            });
+            $q.all([firstPromise, secondPromise]).then(function () {
+              vm.savingSurveys = false;
+            });
+          } else { // source == dest
+            // just move questions between each other
+            var movedQuestionIndex = _.findIndex(sourceSurvey.questions, findById(questionId));
+            sourceSurvey.questions.splice(movedQuestionIndex, 1);
+            if (!insertedBeforeQuestionId) {
+              sourceSurvey.questions.push(movedQuestion);
+            } else {
+              insertPos = _.findIndex(destSurvey.questions, findById(insertedBeforeQuestionId));
+              sourceSurvey.questions.splice(insertPos, 0, movedQuestion);
+            }
+            vm.savingSurveys = true;
+            SurveyService.saveSurvey(sourceSurvey).then(function (survey) {
+              setSurveyQuestionsCategories(survey);
+              sourceSurvey.apply(survey);
+              vm.savingSurveys = false;
+            });
+          }
+
+          $(el).remove(); // as $apply will add the element we just added to the survey.questions array programatically, we can remove the dom element
+          $scope.$apply(); // force UI refresh to avoid duplicate element dom effect
+        });
+      }, 0);
+    }
+  }
+})();

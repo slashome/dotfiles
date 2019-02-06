@@ -1,0 +1,35 @@
+#!/bin/sh
+
+# shortcuts
+alias ll="ls -lF --group-directories-first"
+alias l="ls -alF --group-directories-first"
+alias tr="exa -lhT"
+alias c="clear"
+alias r="ranger"
+alias v="vim"
+alias g="git"
+alias n="ncmpcpp"
+alias cal="calcurse"
+alias vt="vtop"
+alias hal="ssh root@hal9000.im"
+alias pbcopy='xsel --clipboard --input'
+alias pbpaste='xsel --clipboard --output'
+alias subl='subl3'
+alias lg='lazygit'
+
+alias cover="cd ~/scripts/ && urxvt -b 0 -e sh -c ./cover.sh"
+
+# system
+alias updot="cd ~/dotfiles && git pull && ./install.sh"
+
+# trizen
+alias pacs="trizen -Ss"                                 # Search
+alias paci="trizen -S --noconfirm --noedit"             # Install
+alias pacr="trizen -R"                                  # Remove
+alias pacu="trizen -Syyu --noconfirm --noedit"          # Update
+alias pacc="trizen -Sc --noconfirm"                     # Clean
+alias pacl="trizen -Qku"                                # List packages to update
+alias pacli="trizen -Qae"                               # List installed packages
+alias pack="sudo pacman-key --keyserver pgp.mit.edu -r" # Add unknown key
+alias pac-reset-keys="sudo rm -rf /etc/pacman.d/gnupg && sudo pacman-key --init && sudo pacman-key --populate archlinux"
+
