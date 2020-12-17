@@ -794,7 +794,7 @@ c.fonts.messages.warning = '9pt monospace'
 ## Default monospace fonts. Whenever "monospace" is used in a font
 ## setting, it's replaced with the fonts listed here.
 ## Type: Font
-c.fonts.monospace = 'Consolas'
+#c.fonts.monospace = 'Consolas'
 
 ## Font used for prompts.
 ## Type: Font
@@ -806,7 +806,7 @@ c.fonts.statusbar = '9pt monospace'
 
 ## Font used in the tab bar.
 ## Type: QtFont
-c.fonts.tabs = '9pt monospace'
+# c.fonts.tabs = '9pt monospace'
 
 ## Font family for cursive fonts.
 ## Type: FontFamily

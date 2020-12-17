@@ -29,9 +29,9 @@
                     "percent": 0.5,
                     "swallows": [
                        {
-                       // "class": "^URxvt$",
-                       // "instance": "^urxvt$",
-                       // "title": "^sh$"
+                       "class": "^URxvt$",
+                       "instance": "^urxvt$",
+                       "title": "^sh$"
                        }
                     ],
                     "type": "con"
@@ -50,9 +50,9 @@
                     "percent": 0.5,
                     "swallows": [
                        {
-                       // "class": "^URxvt$",
-                       // "instance": "^urxvt$",
-                       // "title": "^Perturbator\\ \\-\\ Femme\\ Fatale\\ \\(Feat\\.\\ Highway\\ Superstar\\)$"
+                       "class": "^URxvt$",
+                       "instance": "^urxvt$",
+                       "title": "^Perturbator\\ \\-\\ Femme\\ Fatale\\ \\(Feat\\.\\ Highway\\ Superstar\\)$"
                        }
                     ],
                     "type": "con"
@@ -73,9 +73,9 @@
             "percent": 0.433333333333333,
             "swallows": [
                {
-               // "class": "^URxvt$",
-               // "instance": "^urxvt$",
-               // "title": "^Perturbator\\ \\-\\ Femme\\ Fatale\\ \\(Feat\\.\\ Highway\\ Superstar\\)$"
+               "class": "^URxvt$",
+               "instance": "^urxvt$",
+               "title": "^Perturbator\\ \\-\\ Femme\\ Fatale\\ \\(Feat\\.\\ Highway\\ Superstar\\)$"
                }
             ],
             "type": "con"
@@ -94,9 +94,9 @@
             "percent": 0.283333333333333,
             "swallows": [
                {
-               // "class": "^URxvt$",
-               // "instance": "^urxvt$",
-               // "title": "^Perturbator\\ \\-\\ Femme\\ Fatale\\ \\(Feat\\.\\ Highway\\ Superstar\\)$"
+               "class": "^URxvt$",
+               "instance": "^urxvt$",
+               "title": "^Perturbator\\ \\-\\ Femme\\ Fatale\\ \\(Feat\\.\\ Highway\\ Superstar\\)$"
                }
             ],
             "type": "con"
@@ -118,9 +118,9 @@
     "percent": 0.665104166666667,
     "swallows": [
        {
-       // "class": "^URxvt$",
-       // "instance": "^urxvt$",
-       // "title": "^i3\\-save\\-tree\\ \\-\\-workspace\\ 9\\ \\>\\ workspace\\-9\\.json$"
+       "class": "^URxvt$",
+       "instance": "^urxvt$",
+       "title": "^i3\\-save\\-tree\\ \\-\\-workspace\\ 9\\ \\>\\ workspace\\-9\\.json$"
        }
     ],
     "type": "con"

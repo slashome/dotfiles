@@ -17,6 +17,7 @@ PROGRAMS=(
     # - CLI APPS - #
     'ranger'                # file manager
     'ncdu'                  # disk usage utility
+    'phpsh'                 # php shell
     'htop'
     'glances'             
     'neomutt'               # mail client
@@ -50,7 +51,9 @@ PROGRAMS=(
     'irssi'                 # The famous IRC client"
     'task'                  # TaskWarrior : A command-line todo list manager
     'khal'                  # A CLI agenda manager"
+    'vdirsyncer'            # A calendar / contacts syncer needed by Khal
     'synergy2-bin'
+    'gradio'                # GUI to listen radios
 
     # - GAMES - #
     'ninvaders'             # invaders

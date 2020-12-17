@@ -11,8 +11,11 @@ if &term =~ '256color' | set t_ut= | endif " Disable Bac:kground Color Erase (tm
 " =======
 call plug#begin('~/.vim/plugged')
 Plug 'thaerkh/vim-workspace'              " Session manager
-"Plug 'xolox/vim-session'                  " Session manager - Sublime-Text project switcher alike
-"Plug 'xolox/vim-misc'                     " Xolox plugin's shared library
+Plug 'irrationalistic/vim-tasks'          " Todo / tasks manager
+" Plug 'freitass/todo.txt-vim'              " todo.txt file mamanger
+" Plug 'aserebryakov/vim-todo-lists'        " Todo list manager
+" Plug 'xolox/vim-session'                  " Session manager - Sublime-Text project switcher alike
+" Plug 'xolox/vim-misc'                     " Xolox plugin's shared library
 Plug 'fatih/vim-go'                       " Go support for vim
 Plug 'ryanoasis/vim-devicons'
 Plug 'vimwiki/vimwiki'                    " A wiki for Vim

@@ -21,8 +21,8 @@
             "percent": 0.5,
             "swallows": [
                {
-               // "class": "^qutebrowser$",
-               // "instance": "^qutebrowser$",
+               "class": "^qutebrowser$"
+               // "instance": ""
                // "title": "^qutebrowser$"
                }
             ],
@@ -74,7 +74,7 @@
                                             "percent": null,
                                             "swallows": [
                                                {
-                                               // "class": "^URxvt$",
+                                               "class": "^URxvt$"
                                                // "instance": "^urxvt$",
                                                // "title": "^sh$"
                                                }
@@ -97,7 +97,7 @@
                                     "percent": 0.5,
                                     "swallows": [
                                        {
-                                       // "class": "^URxvt$",
+                                       "class": "^URxvt$"
                                        // "instance": "^urxvt$",
                                        // "title": "^Perturbator\\ \\-\\ Femme\\ Fatale\\ \\(Feat\\.\\ Highway\\ Superstar\\)$"
                                        }
@@ -120,7 +120,7 @@
                             "percent": 0.617918313570487,
                             "swallows": [
                                {
-                               // "class": "^URxvt$",
+                               "class": "^URxvt$"
                                // "instance": "^urxvt$",
                                // "title": "^Perturbator\\ \\-\\ Femme\\ Fatale\\ \\(Feat\\.\\ Highway\\ Superstar\\)$"
                                }
@@ -143,7 +143,7 @@
                     "percent": 0.5,
                     "swallows": [
                        {
-                       // "class": "^qutebrowser$",
+                       "class": "^qutebrowser$"
                        // "instance": "^qutebrowser$",
                        // "title": "^Tiny\\ Tiny\\ RSS\\ \\:\\ Login\\ \\-\\ qutebrowser$"
                        }
@@ -169,7 +169,7 @@
     "percent": 0.6,
     "swallows": [
        {
-       // "class": "^qutebrowser$",
+       "class": "^qutebrowser$"
        // "instance": "^qutebrowser$",
        // "title": "^Supermood\\ \\|\\ Equipes\\ Import\\ \\-\\ qutebrowser$"
        }

@@ -2,21 +2,23 @@
 
 # define colors
 RED=%{F#eb3324}
+ORANGE=%{F#FFA500}
 GREEN=%{F#07b200}
 NC=%{F#eb3324}
 
-ANGULAR_FILE=/home/flow/workspace/projects/main-app/logs/angular.log
-GRUNT_FILE=/home/flow/workspace/projects/main-app/logs/grunt.watch.log
+STORAGE_PATH=/home/flow/workspace/projects/supermood/supermood/platform/backend/services/supermood-api/logs
+ANGULAR_FILE=$STORAGE_PATH/angular.log
+GRUNT_FILE=$STORAGE_PATH/grunt.watch.log
 
 # check pulse status
 case "$1" in
 "ang")
   LAST_LINE=`awk '/./{line=$0} END{print line}' $ANGULAR_FILE`
-  if [[ "${LAST_LINE:29}" == 'Compiled successfully.' ]]
+  if [[ $LAST_LINE == ': Compiled successfully.' ]]
   then
-  	echo "$GREEN  A  $NC"
+  	echo "$GREEN    $NC"
   else
-  	echo "$RED  A  $NC"
+  	echo "$RED    $NC"
   fi
 ;;
 "grunt")
@@ -24,9 +26,9 @@ case "$1" in
   LAST_LINE=`awk '{this=last;last=$0} END{print this}' $GRUNT_FILE | sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[mGK]//g"`
   if [[ $LAST_LINE == 'Done.' ]] || [[ $COUNT == "2" ]]
   then
-  	echo "$GREEN  G  $NC"
+  	echo "$GREEN    $NC"
   else
-  	echo "$RED  G  $NC"
+  	echo "$RED    $NC"
   fi
 esac
 

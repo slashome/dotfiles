@@ -14,8 +14,8 @@ set $margins 6
 ##MONITOR_START
 ##MONITOR_END
 
+set $monitorLeft HDMI-1
 set $monitorRight HDMI-1
-set $monitorLeft DP-1
 
 ###############################
 #         APPEARANCE          #
@@ -122,11 +122,12 @@ bindsym XF86AudioMute exec --no-startup-id pactl set-sink-mute @DEFAULT_SINK@ to
 # bindsym XF86AudioStop exec dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.Stop
 
 # music: mpd
-bindsym XF86AudioPlay exec "mpc play"
-bindsym XF86AudioPause exec "mpc pause"
-bindsym XF86AudioNext exec "mpc next"
-bindsym XF86AudioPrev exec "mpc prev"
-bindsym XF86AudioStop exec "mpc stop"
+bindsym XF86AudioPlay exec mpc play
+bindsym XF86AudioPause exec mpc pause
+bindsym XF86AudioNext exec mpc next
+bindsym XF86AudioPrev exec mpc prev
+bindsym XF86AudioStop exec mpc stop
+bindsym Hiragana exec "mpc toggle"
 
 # Capture d'écran
 bindsym Print exec xfce4-screenshooter
@@ -235,35 +236,17 @@ smart_gaps on
 exec --no-startup-id compton
 exec --no-startup-id ckb-next
 exec --no-startup-id greenclip daemon
-
-# assign programs to workspace CMD > xprop | grep WM_CLASS
-#assign [class="jetbrains-phpstorm"]                $ws1
-#for_window [class="franz"]       move to workspace $ws9
-#assign [class="Firefox"]                           $ws7
-#assign [class="subl"]                              $ws7
-#for_window [class="boostnote"]   move to workspace $ws10
-
-
-#exec --no-startup-id franz
-#exec --no-startup-id phpstorm
-#exec --no-startup-id i3-msg 'workspace $ws2; exec firefox -P glh_dev'
-#exec --no-startup-id i3-msg 'workspace $ws3; exec firefox -P glh_jira'
-#exec --no-startup-id i3-msg 'workspace $ws3; exec firefox -P glh_gitlab'
-#exec --no-startup-id i3-msg 'workspace $ws7; exec firefox -P flow_work'
-#exec --no-startup-id i3-msg 'workspace $ws8; exec firefox -P flow_chill'
-#exec --no-startup-id i3-msg 'workspace $ws10; exec urxvt'
-#exec --no-startup-id i3-msg 'workspace $ws10; exec boostnote'
-#exec --no-startup-id i3-msg 'workspace $ws9; exec franz-bin'
-#exec --no-startup-id i3-msg 'workspace $ws1; exec phpstorm'
+exec --no-startup-id dunst
 
 # start docker containers
-exec --no-startup-id docker start supermood-app
-exec --no-startup-id docker start supermood-custom-integrations
-exec --no-startup-id docker start supermood-ml-service
-exec --no-startup-id docker start supermood-memcached
-exec --no-startup-id docker start supermood-rights-api
-exec --no-startup-id docker start supermood-mailcatcher
-exec --no-startup-id docker start supermood-db
+exec --no-startup-id supermood-db
+exec --no-startup-id supermood-mailcatcher
+exec --no-startup-id supermood-compiler
+exec --no-startup-id supermood-custom-integrations
+exec --no-startup-id supermood-memcached
+exec --no-startup-id supermood-ml-service
+exec --no-startup-id supermood-rights-api
+exec --no-startup-id supermood-app
 
 # rsync music directory
 # exec --no-startup-id screen -dmS rsync_music bash -c "rsync -avzh --progress --delete --exclude '@eaDir' root@hal9000.im:/volume1/music /mnt/storage/; sleep 1;"
@@ -283,17 +266,16 @@ exec_always --no-startup-id /home/flow/dotfiles/scripts/screen/set-wallpaper
 exec_always --no-startup-id /home/flow/dotfiles/scripts/screen/launch-polybar
 
 # freezed
-#exec --no-startup-id i3-msg 'workspace $ws2; exec google-chrome-stable --profile-directory="Default"'    # start Dev       dedicated chrome
-#exec --no-startup-id i3-msg 'workspace $ws3; exec google-chrome-stable --profile-directory="Profile 4"'  # start Jira      dedicated chrome
-#exec --no-startup-id i3-msg 'workspace $ws3; exec google-chrome-stable --profile-directory="Profile 5"'  # start GitLab    dedicated chrome
-#exec --no-startup-id i3-msg 'workspace $ws3; exec google-chrome-stable --profile-directory="Profile 2"'  # start Chill     dedicated chrome
-#exec --no-startup-id i3-msg 'workspace $ws3; exec google-chrome-stable --profile-directory="Profile 6"'  # start Jira     dedicated chrome
-#exec_always --no-startup-id "killall polybar;polybar -r center & polybar -r left & polybar -r right"
-#exec --no-startup-id subl        replaced by nvim
-#exec --no-startup-id spotify
-#exec --no-startup-id redshift -l 43.610769:3.876716 -t 6500:3500 -l manual
-#exec --no-startup-id /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
-#exec --no-startup-id docker start portainer
+exec --no-startup-id /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
 
+# start programs
 exec --no-startup-id i3-msg 'workspace $ws10; exec qb dev'
-exec --no-startup-id i3-msg 'workspace $ws7; exec qb flow'
+exec --no-startup-id i3-msg 'workspace $ws7;  exec qb flow'
+exec --no-startup-id i3-msg 'workspace $ws6;  exec chromium'
+exec --no-startup-id i3-msg 'workspace $ws5;  exec qb agenda'
+exec --no-startup-id i3-msg 'workspace $ws4;  exec qb slack'
+exec --no-startup-id i3-msg 'workspace $ws4;  exec qb mail'
+exec --no-startup-id i3-msg 'workspace $ws3;  exec qb github'
+exec --no-startup-id i3-msg 'workspace $ws2;  exec qb trello'
+exec --no-startup-id i3-msg 'workspace $ws1;  exec phpstorm'
+

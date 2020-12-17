@@ -22,26 +22,26 @@ padding-left = 0
 padding-right = 3
 module-margin = 2
 
-font-0 = SF Pro Text:size=10;2
-; font-1 = FontAwesome:size=10;2
-font-1 = NotoSansMono Nerd Font:size=10;2
-font-2 = xos4 Terminus:size=12:weight=bold;2
-font-3 = Material Icons:size=13;2
-
+; font-0 = Arimo Nerd Font:size=10;1
+; font-0 = mplus Nerd Font:size=10;1
+; font-0 = Ubuntu Nerd Font:size=10;1
+; font-0 = URWGothic Nerd Font:size=11;1 
+font-0 = TerminessTTF Nerd Font Mono:size=10;1
+font-1 = TerminessTTP Nerd Font Mono:size=12;1
 
 [bar/mono]
 inherit = bar/default
-modules-left = i3 eth wireless-network xwindow
-modules-right = wallch cpu temperature memory swap fs-root pulseaudio backlight powermenu
-modules-center = date time-paris time-montreal
+modules-left = i3 wired-network angular grunt weather
+modules-center = xwindow date time-paris
+modules-right = mpd archupdate cpu memory swap fs-root fs-home fs-storage pulseaudio powermenu
 tray-position = right
 tray-detached = false
 tray-padding = 0
 
 [bar/dual_left]
 inherit = bar/default
-modules-left = i3 wireless-network angular grunt mpd
-modules-right = taskwarrior cpu memory swap fs-root fs-home fs-storage
+modules-left = i3 wired-network angular grunt weather
+modules-right = cpu memory swap fs-root fs-home fs-storage
 modules-center = xwindow
 tray-position = right
 tray-detached = false
@@ -49,9 +49,9 @@ tray-padding = 0
 
 [bar/dual_right]
 inherit = bar/default
-modules-left = i3
-modules-center = date time-paris time-montreal
-modules-right = mpd archupdate wallch volume powermenu
+modules-left = i3 wired-network angular grunt weather
+modules-right = mpd archupdate pulseaudio powermenu
+modules-center = date time-paris
 
 [settings]
 screenchange-reload = true
@@ -72,15 +72,15 @@ fuzzy-match = true
 format = <label-mode><label-state>
 label-mode-padding = 2
 label-mode-underline = ${colors.underline}
-label-focused = %index%  %icon%
+label-focused = %index% %{T2}%icon%%{T-}
 label-focused-foreground = ${colors.underline}
 label-focused-underline = ${colors.underline}
 label-focused-padding = 2
-label-unfocused = %index%  %icon%
+label-unfocused = %index% %{T2}%icon%%{T-}
 label-unfocused-padding = 2
 label-unfocused-foreground = ${colors.foreground}
 label-unfocused-underline = ${colors.secondary}
-label-visible = %index%  %icon%
+label-visible = %index% %{T2}%icon%%{T-}
 label-visible-underline = ${colors.foreground}
 label-visible-padding = 2
 label-urgent = %index%  %icon%
@@ -97,7 +97,7 @@ ws-icon-5 = 6;
 ws-icon-6 = 7;
 ws-icon-7 = 8;
 ws-icon-8 = 9;
-ws-icon-9 = 10;
+ws-icon-9 = 0;
 
 [module/archupdate]
 type = custom/script
@@ -105,10 +105,17 @@ interval = 3600
 format = <label>
 format-underline = ${colors.foreground}
 label = "%output:0:30%"
-label-font = 2
+label-font = 0
 exec = ~/.config/polybar/scripts/archupdate.sh
 exec-if = "ping -q -w 2 -c 1 176.34.135.167 > /dev/null"
 click-left = exec urxvt -e trizen -Syyu --noconfirm --noedit; ~.config/polybar/archupdate.sh;
+
+[module/weather]
+type = custom/script
+exec = ~/.config/polybar/scripts/forecast/polybar-forecast
+exec-if = ping openweathermap.org -c 1
+interval = 600
+label-font = 0 
 
 [module/angular]
 type = custom/script
@@ -259,7 +266,8 @@ ramp-4 = 🌑
 type = internal/fs
 interval = 25
 mount-0 = /
-label-mounted = " root  %percentage_used%%"
+; label-mounted = " root  %percentage_used%%"
+label-mounted = " /  %percentage_used%%"
 label-mounted-underline = ${colors.secondary}
 label-unmounted = %mountpoint% not mounted
 label-unmounted-foreground = ${colors.foreground}
@@ -268,7 +276,8 @@ label-unmounted-foreground = ${colors.foreground}
 type = internal/fs
 interval = 25
 mount-0 = /home
-label-mounted = " home  %percentage_used%%"
+; label-mounted = " home  %percentage_used%%"
+label-mounted = " h  %percentage_used%%"
 label-mounted-underline = ${colors.secondary}
 label-unmounted = %mountpoint% not mounted
 label-unmounted-foreground = ${colors.foreground}
@@ -277,7 +286,8 @@ label-unmounted-foreground = ${colors.foreground}
 type = internal/fs
 interval = 25
 mount-0 = /mnt/storage
-label-mounted = " storage  %percentage_used%%"
+; label-mounted = " storage  %percentage_used%%"
+label-mounted = " s  %percentage_used%%"
 label-mounted-underline = ${colors.secondary}
 label-unmounted = %mountpoint% not mounted
 label-unmounted-foreground = ${colors.foreground}
@@ -310,11 +320,25 @@ ramp-volume-1 = 
 ramp-volume-2 = 
 ramp-volume-3 = 
 
+[module/pulseaudio]
+type = internal/pulseaudio
+sink = bluez_sink.28_11_A5_DC_E2_59.a2dp_sink
+use-ui-max = true
+interval = 5
+format-volume = <ramp-volume> <label-volume>
+label-muted = 🔇 muted
+label-muted-foreground = #666
+ramp-volume-0 = 
+ramp-volume-1 = 
+ramp-volume-2 = 
+ramp-volume-3 = 
+
 [module/mpd]
 type = internal/mpd
 host = /home/flow/.config/mpd/socket
 interval = 2
-format-online = <label-song>  <bar-progress>  <label-time>  <icon-prev>  <icon-stop>  <toggle> <icon-next>
+; format-online = <label-song>  <bar-progress>  <label-time>  <icon-prev>  <icon-stop>  <toggle> <icon-next>
+format-online = <label-song> <icon-prev> <toggle> <icon-next>
 format-playing = ${self.format-online}
 format-paused = ${self.format-online}
 format-stopped = ${self.format-online}
@@ -338,13 +362,13 @@ bar-progress-indicator = |
 bar-progress-fill = ─
 bar-progress-empty = ─
 
-[module/eth]
+[module/wired-network]
 type = internal/network
 interface = enp0s31f6
 format-connected = <label-connected>
 format-connected-underline = ${colors.underline}
 format-disconnected = <label-disconnected>
-label-connected =  %local_ip% : %linkspeed:9%
+label-connected =  %upspeed:9% %downspeed:9%
 label-disconnected = 
 
 [module/wireless-network]
@@ -372,7 +396,7 @@ animation-packetloss-framerate = 500
 
 [module/powermenu]
 type = custom/menu
-label-active-font = 1
+label-active-font = 0
 format-spacing = 1
 label-open = "    "
 label-open-underline = ${colors.secondary}
@@ -392,7 +416,7 @@ menu-0-2-exec = poweroff
 
 [module/scripts]
 type = custom/menu
-label-active-font = 1
+label-active-font = 0
 format-spacing = 1
 label-open = "    "
 label-open-underline = ${colors.secondary}
@@ -425,11 +449,11 @@ menu-0-1-exec = exec urxvt -e /home/flow/workspace/scripts/switch_profil_extrane
 ; bar-volume-foreground-6 = #ff5555
 ; bar-volume-gradient = false
 ; bar-volume-indicator = |
-; bar-volume-indicator-font = 2
+; bar-volume-indicator-font = 0
 ; bar-volume-fill = ─
-; bar-volume-fill-font = 2
+; bar-volume-fill-font = 0
 ; bar-volume-empty = ─
-; bar-volume-empty-font = 2
+; bar-volume-empty-font = 0
 ; bar-volume-empty-foreground = ${colors.secondary}
 
 [module/temperature]

@@ -3,5 +3,5 @@
 
 killall polybar
 
-MONITOR=HDMI-1 polybar -r dual_right &
-MONITOR=DP-1 polybar -r dual_left &
+MONITOR=HDMI1 polybar -r dual_left &
+MONITOR=DP1 polybar -r dual_right &
